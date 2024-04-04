@@ -1,0 +1,1901 @@
+---
+title: "The Long-Term Impact of Experiencing War on Life Satisfaction - Evidence from the Life in Transition Survey"
+date: 2024-04-02
+author:
+  - name: Jemesa Landers
+    affiliation: 
+      - name: University of Canterbury
+        city: Christchurch
+  - name: Tom Coupé
+    email: tom.coupe@canterbury.ac.nz
+    corresponding: TRUE
+    acknowledgements: "We would like to thank Maksym Obrizan and Jeremy Clark for comments on the Mcom thesis version of this paper."
+    affiliation: 
+        
+      - name: University of Canterbury
+        city: Christchurch
+  - name: Andrea Menclova
+    affiliation: 
+      - name: University of Canterbury
+        city: Christchurch
+keywords:
+  - War
+  - Life Satisfaction
+  - Replications
+  - Metaverse
+  - Specification Curve
+abstract: "This paper replicates, evaluates and updates the papers that estimate the long run impact of experiencing war on life satisfaction using the Life in Transition Survey. We show that while the published results can be replicated, conclusions are very sensitive to specification choices the authors made. Overall, we find little evidence supporting a causal long-term effect of war experience on life satisfaction."
+format:
+  html
+editor: visual
+bibliography: references.bib
+editor_options: 
+  chunk_output_type: console
+---
+
+## I. Introduction.
+
+There is a growing literature on the impact of experiencing war on life satisfaction ( see @CoupeObrizan2023 for a recent review). Interestingly, however, several papers in this literature come to opposite conclusions even though they use the same dataset, and the same variables to measure life satisfaction and war.
+
+Using the 2010 wave of the Life in Transition Survey (LITSII), which covers over 30000 respondents from thirty five European and Central Asian countries, @Kijewski2020 finds that respondents who were physically injured, or had parents or grandparents physically injured or killed during World War II, have significantly lower levels of life satisfaction, measured on a scale between 1 and 10 (Table 4, −0.108, p\<0.01, n=25618). In the paper's abstract, @Kijewski2020 writes: "Our findings indicate that war experiences continue to be related to lower levels of life satisfaction even six decades after the end of the war".
+
+However, @Ivlevs2015, also using LITSII, the same war variable and the same life satisfaction variable (but restricting the sample to those less than 65 years old), finds a positive and significant effect (Table 2, 0.071, p\<0.05, n=24070). @Ivlevs2015 explains this positive effect by referring to the happiness of having survived, to war increasing "feelings of shared purpose, solidarity, trust, friendship and national pride", and to pride of having "someone in their family died as a 'martyr' or was fighting for a 'good' or 'holy' cause'" (p. 349).
+
+Finally, @ChildNikolova2020 restricts the LITSII sample to "15 countries which experienced significant disruption from World War II battle activity" and finds no significant effect of the same war variable on the same life satisfaction variable (Table 8, --0.006, p\>0.1, n=9538).
+
+Noteably, both @Kijewski2020 and @ChildNikolova2020 (but not @Ivlevs2015) include a second war-related variable, a dummy for whether the respondent, or any of his/her parents or grandparents were displaced during World War II, as a control variable. Both estimated this variable to have a positive and significant effect on life satisfaction (Table 4, 0.118, p\<0.01, n=25618, and Table 8, 0.078, p\<0.01, n=9538, respectively).
+
+Besides these 3 studies, there are two other studies that use the same LITSII dataset but use slightly different measures of life satisfaction and/or war experience. @NikolovaSanfey2016 convert the 1 to 10 life satisfaction scale into a 1 to 5 scale, and merge both aspects (being displaced and/or injured/killed in the war) into one war experience variable, and find no significant effect (Table A1, 0.0241, p\>0.1, n=25666). In addition, they use a second life satisfaction question included in LITS II, which is also on a 1 to 5 scale, and again find no significant effect (Table A1, 0.00630, p\>0.1, n=25427). Using the latter question and the aggregated war variable, @Djankovetal2016 also find no effect (Table 5, −0.008, p\>0.1, n=24836).
+
+Table I gives an overview of the characteristics and findings of the five studies that use LITSII to estimate the relationship between World War II exposure and life satisfaction.
+
+```{r, include=FALSE}
+
+#(table 4, 0.118, p\<0.01, n=25,618
+#and table 8, 0.078, p\<0.01, n=9538, respectively).
+
+
+tab <- matrix(c(4, -0.108, 'p<0.01', 25618,'1-10', 'Injured/killed, Moved',  8, -0.006, 'p>0.1', 9538,'1-10','Injured/killed, Moved',2, 0.071, 'p<0.05', 24070,'1-10','Injured/killed', 'A1', 0.0241, 'p>0.1', 25666,'1-5','Injured/killed OR Moved', 'A1', 0.00630, 'p>0.1', 25427,'1-5','Injured/killed, OR Moved', 5, -0.008, 'p>0.1', 24836,'1-5','Injured/killed OR Moved'), ncol=6, byrow=TRUE)
+colnames(tab) <- c('Table Nr.','Effect Size','P value','Sample Size', 'Life Satisfaction Scale',  'War Measures')
+rownames(tab) <- c('Kijewski 2020','Child and Nikolova 2020', 'Ivlevs 2015', 'Nikolova and Sanfey 2016 (I)', 'Nikolova and Sanfey 2016 (II)', 'Djankov et al. 2016')
+tab1 <- as.table(tab)
+
+```
+
+```{r include=FALSE}
+library(gt)
+#install.packages('webshot2')
+library(webshot2)
+
+gt_tbl <- gt(as.data.frame(tab), rownames_to_stub = TRUE)
+gt_tbl|>cols_align(align = c("center"),columns = everything()
+)|>tab_header( 'Table I: Estimating the Impact of Experiencing World War II on Life Satisfaction', subtitle = NULL, preheader = NULL)
+# Show the gt Table
+#gt_tbl
+gt_tbl |> gtsave("tab_1.png")
+
+```
+
+![](tab_1.png)
+
+Note that, while the above studies focus on how World War II affects happiness, none of them allowed for other, more recent and local wars, to affect happiness, even though questions about victimization and displacement related to these other wars are available in the LITSII survey. Moreover, @Obrizan2019, using the third wave of the Life in Transition Survey (LITSIII), regresses life satisfaction (a happy/not happy dummy) on these recent war experiences, and finds insignificant negative effects of having injured or killed household members, but significant negative effects of having been displaced by these more recent and local wars (Table 2, -0.063, p\<0.01, n=18157). Interestingly, @Obrizan2019 does not allow for World War II experience to influence life satisfaction.[^1]
+
+[^1]: Using LITSIII, @Adseraetal2021 measures war experience by whether the respondent was less than 2 years old during World War II or a more recent war. They do not show the estimates of this variable suggesting it was insignificant. @Recher2022 regresses the absolute value of the difference between the life satisfaction in various locations on differences in war experience (both recent wars and World War II), and finds a significant relationship. However, given absolute values are taken, one can not distinguish whether war has a negative or a positive effect. We will not consider these papers as our focus is on the impact of personally experiencing the impact of war (rather than living in/being born in a country affected by war). Similarly, our analysis ignores the impact on the life satisfaction of those killed during the war.
+
+In this paper, we analyse possible reasons for the conflicting findings of these previosu studies. We start by replicating the results of table I. There is ample evidence of a replication crisis in the social sciences (see for example, @Baker2016 or @Reed2018), with researchers being unable to reproduce the results of published papers when trying to repeat the analysis described in those papers. Replicating the five papers from Table I will allow us to eliminate the possibility that the opposing findings are due to coding errors or typos in the published papers.
+
+We then do perform specification curve analysis. The studies from Table I taken together make a 'real-life' 'many analysts project'. In a 'many analysts project' (see, for example, @Huntington2021, or in the context of life satisfaction, @Hoogeveen2023), a researcher provides a large number of analysts with the same dataset and research question, and then investigates how their conclusions differ. Typically, such projects document substantial differences in methodological choices and in some cases, substantial differences in conclusions. To show the range of possible outcomes (and avoid conflicting papers to be published), @Simonsohn2020 propose specification curve analysis, which consists of conducting joint inference across all 'theoretically relevant' and 'statistically valid' specifications. In this paper, we use the specifications proposed by the five papers as the starting point of a specification curve analysis, allowing us to assess the degree of model uncertainty; that is, to what extent different specification choices lead to different estimates and conclusions.
+
+Finally, we will analyse to what extent the conclusions of the studies of Table I are stable over time, by using the most recent, third, wave of the Life in Transition Survey and re-estimating the specifications of the five original studies. Together, the replication, the specification curve analysis and the updated analysis will allow us to assess how strong the evidence, that the Life in Transition Survey can provide, is about the long-term impact of war on life satisfaction.
+
+Admittedly, it is difficult to obtain causal evidence based on non-experimental survey data like LITS, as the 'treatment' variable is not randomized. At the same time, it is hard to see how one could ethically run an experiment to measure the long-term effect of experiencing war on life satisfaction. While this means the 'strongest support for the causation hypothesis' is out of reach, we can analyse how well the research on the impact of war on life satisfaction scores on some of the other Bradford-Hill criteria (@BradfordHill1965) such as consistency - that is, has the effect 'been repeatedly observed by different persons, in different places, circumstances and times?' - or the 'strength of the association'. Note that within the constraints of using non-experimental data, LITS has several important advantages. The survey is large, with tens of thousands of respondents, and has been implemented in both 2010 (LITSII) and 2016 (LITSIII). It allows to measure life satisfaction in different ways based on two separate survey questions. Finally, while few large-scale surveys ask about war experiences, LITS has five questions related to war experience. Hence, LITS is one of the best available sources to estimate the long-term impact of war on life satisfaction.
+
+The remainder of the paper is structured as follows. Section II replicates the five papers that provide estimates of the impact of World War II on life satisfaction. Section III provides a specification curve analysis focusing on the impact of having been physically injured, or having parents or grandparents who were physically injured or killed during World War II. Section IV focuses on the impact of having been displaced during World War II and of having been affected by more recent wars. Section V analyses the same questions but uses data from the third wave of LITS, while Section VI concludes.
+
+## II. Replicating the literature.
+
+```{r setwd, include=FALSE}
+
+setwd('C:/Users/tco55/OneDrive - University of Canterbury/github/war')
+
+```
+
+```{r all data, include=FALSE}
+#1.  The Dataset Loading LITSII
+
+library(haven)
+LITSII <- read_dta("lits2.dta", encoding = "latin1")
+
+```
+
+```{r all lifesatisfaction variables, include=FALSE}
+#2.  The Dependent Variable
+
+# note in the below we putting missing/dk to NA
+
+#scale 1 - 10 variable
+LITSII$lifesatisfaction110 <- LITSII$q722
+LITSII$lifesatisfaction110[LITSII$lifesatisfaction110<0]=NA
+summary(LITSII$lifesatisfaction110)
+
+
+
+#scale 1 - 5 variable
+LITSII$lifesatisfaction15 <- LITSII$q301e
+LITSII$lifesatisfaction15[LITSII$lifesatisfaction15<0]=NA
+LITSII$lifesatisfaction15[LITSII$lifesatisfaction15>5]=NA
+
+summary(LITSII$lifesatisfaction15)
+
+
+#scale 1 -10  transformed to 1 - 5 variable (Nikolova-Sanfey)
+
+LITSII$S21 <- ifelse(LITSII$q722==1 | LITSII$q722==2, 1, 0)
+LITSII$S22 <- ifelse(LITSII$q722==3 | LITSII$q722==4, 1, 0)
+LITSII$S23 <- ifelse(LITSII$q722==5 | LITSII$q722==6, 1, 0)
+LITSII$S24 <- ifelse(LITSII$q722==7 | LITSII$q722==8, 1, 0)
+LITSII$S25 <- ifelse(LITSII$q722==9 | LITSII$q722==10, 1, 0)
+LITSII$lifesatisfaction110to15<-LITSII$S21+(2*LITSII$S22)+(3*LITSII$S23)+(4*LITSII$S24)+(5*LITSII$S25)
+summary(LITSII$lifesatisfaction110to15)
+LITSII$lifesatisfaction110to15[LITSII$q722<0]=NA
+summary(LITSII$lifesatisfaction110to15)
+
+
+#happy dummy for agree/strongly agree (Obrizan)
+LITSII$happy <- ifelse(LITSII$q301e>3,1,0)
+summary(LITSII$happy)
+LITSII$happy[LITSII$q301e<0]=NA
+summary(LITSII$happy)
+
+
+
+```
+
+```{r all war variables , include=FALSE}
+#3.  The Main Variables of Interest: war related variables
+
+LITSII$WW2injury <- ifelse(LITSII$q721a==1,1,0)
+LITSII$WW2injury[LITSII$q721a<1]=NA
+summary(LITSII$WW2injury)
+
+
+LITSII$WW2moved <- ifelse(LITSII$q721b==1,1,0)
+LITSII$WW2moved[LITSII$q721b<1]=NA
+summary(LITSII$WW2moved)
+
+LITSII$WW2any <- ifelse(LITSII$q721a==1 |LITSII$q721b==1,1,0)
+LITSII$WW2any[LITSII$q721a<1 | LITSII$q721b<1]=NA
+summary(LITSII$WW2any)
+
+
+# -1 is not asked - for countries where there was no recent war
+# so we put all zero for those as no wars in those!
+
+LITSII$recentwarinjury <- ifelse(LITSII$q721c==1,1,0)
+LITSII$recentwarinjury[LITSII$q721c< -1]=NA
+summary(LITSII$recentwarinjury)
+
+LITSII$recentwarHHinjury <- ifelse(LITSII$q721d==1,1,0)
+LITSII$recentwarHHinjury[LITSII$q721d< -1]=NA
+summary(LITSII$recentwarHHinjury)
+
+LITSII$recentwarmoved <- ifelse(LITSII$q721e==1,1,0)
+LITSII$recentwarmoved[LITSII$q721e< -1]=NA
+summary(LITSII$recentwarmoved)
+
+LITSII$recentwarany <- ifelse(LITSII$q721c==1 |LITSII$q721d==1 |LITSII$q721e==1,1,0)
+LITSII$recentwarany[LITSII$q721c< -1 | LITSII$q721d< -1 | LITSII$q721e< -1]=NA
+
+summary(LITSII$recentwarany)
+
+
+
+```
+
+```{r all health , include=FALSE}
+#4.  The Common Control Variables
+
+##health variable, removing those who don't know when asked how they would assess their health
+LITSII$health <- LITSII$q704
+LITSII$health[LITSII$health<0]=NA
+summary(LITSII$health)
+
+LITSII$healthgood <-ifelse(LITSII$health==1|LITSII$health==2,1,0)
+LITSII$healthgood[LITSII$health<0]=NA
+
+LITSII$healthbad <-ifelse(LITSII$health==4|LITSII$health==5,1,0) 
+LITSII$healthbad[LITSII$health< 0]=NA
+summary(LITSII$healthbad)
+summary(LITSII$healthgood)
+
+```
+
+```{r all marital status, include=FALSE}
+
+LITSII$maritalstatus <- LITSII$q701
+LITSII$maritalstatus[LITSII$maritalstatus<0.01]=NA
+summary(LITSII$maritalstatus)
+LITSII$married <- ifelse(LITSII$maritalstatus == 2, 1, 0)
+LITSII$married[LITSII$maritalstatus<0.01]=NA
+summary(LITSII$married)
+
+# ivlevs put seperated and divorced together
+
+LITSII$maritalstatusivlevs <- LITSII$maritalstatus
+LITSII$maritalstatusivlevs<-ifelse(LITSII$maritalstatusivlevs==4,3,LITSII$maritalstatusivlevs)
+LITSII$maritalstatusivlevs[LITSII$maritalstatus<0.01]=NA
+summary(LITSII$maritalstatusivlevs)
+```
+
+```{r all gender, include=FALSE}
+
+LITSII$male <- ifelse(LITSII$respondentgender==1,1,0)
+LITSII$male[LITSII$respondentgender<1]=NA
+summary(LITSII$male)
+LITSII$female <- ifelse(LITSII$respondentgender==2,1,0)
+LITSII$female[LITSII$respondentgender<1]=NA
+summary(LITSII$female)
+```
+
+```{r all respondentage, include=FALSE}
+
+##FOR ALL DATASETS, removing those under the age of 17 to have adults only be analysed for results; safety and privacy concerns and consistency
+
+LITSII<-subset(LITSII, LITSII$respondentage>17)
+
+
+# yob (Kijewski)
+LITSII$yob <- 2010 - LITSII$respondentage
+LITSII$yob[LITSII$respondentage<18]=NA
+summary(LITSII$yob)
+
+
+LITSII$age <- LITSII$respondentage
+LITSII$age[LITSII$respondentage<18]=NA
+summary(LITSII$age)
+
+LITSII$agesq <- LITSII$age^2
+summary(LITSII$agesq)
+##creating a standardized squared term of age as age has been found to have a u shaped relationship with happiness (kijewski)
+
+LITSII$agesqst <-(LITSII$agesq - summary(LITSII$agesq)['Mean'])/sd(LITSII$agesq, na.rm=TRUE)
+summary(LITSII$agesqst)
+LITSII$agesqst[LITSII$respondentage<18]=NA
+
+# age categories (ivlevs)
+
+LITSII$age1824 <- ifelse(LITSII$respondentage>17 & LITSII$respondentage<25, 1, 0)
+LITSII$age1824[LITSII$respondentage<18]=NA
+
+
+LITSII$age2534 <- ifelse(LITSII$respondentage>24 & LITSII$respondentage<35, 1, 0)
+LITSII$age2534[LITSII$respondentage<18]=NA
+
+
+LITSII$age4554 <- ifelse(LITSII$respondentage>44 & LITSII$respondentage<55, 1, 0)
+LITSII$age4554[LITSII$respondentage<18]=NA
+
+LITSII$age5564 <- ifelse(LITSII$respondentage>54 & LITSII$respondentage<65, 1, 0)
+LITSII$age5564[LITSII$respondentage<18]=NA
+
+
+summary(LITSII$age1824)
+summary(LITSII$age2534)
+summary(LITSII$age4554)
+summary(LITSII$age5564)
+
+```
+
+```{r all fatherseducation , include=FALSE}
+
+LITSII$fatherseducation <- LITSII$q718
+LITSII$fatherseducation[LITSII$q718<0]=NA
+summary(LITSII$fatherseducation)
+
+```
+
+```{r all employment, include=FALSE}
+
+LITSII$employeddummy <- ifelse(LITSII$q501 == 1, 1, 0)
+LITSII$employeddummy[LITSII$q501<1]=NA
+summary(LITSII$employeddummy)
+
+
+# Kijewski employmentstatus variable
+##grouping the people that are actively unemployed i.e. in the labour pool as they are actively looking for work/additional work (data from q522) but still unemployed (data from q501)
+
+##grouping the people who answered "yes" to employed in the last 12 months into a dummy variable with those employed as the reference variable
+LITSII$employmentstatus <- ifelse(LITSII$q501 == 1, 0, 2)
+LITSII$employmentstatus[LITSII$q501<1]=NA
+# then use q522 for those looking for job among those without employment
+LITSII$lookingforjob <- ifelse((LITSII$q522 == 1|LITSII$q522 == 2) & LITSII$q501 == 2, 1,0)
+LITSII$employmentstatus[LITSII$lookingforjob==1]=1
+table(LITSII$employmentstatus)
+summary(LITSII$employmentstatus)
+
+```
+
+```{r all education, include=FALSE}
+#education variable, removing those who refused to answer or don't know
+LITSII$education <- LITSII$q515
+LITSII$education[LITSII$q515<1]=NA
+summary(LITSII$education)
+
+# ivlevs. childs
+LITSII$education1 <- ifelse(LITSII$q515==3 | LITSII$q515==4, 1, 0)
+LITSII$education2 <- ifelse(LITSII$q515==5|LITSII$q515==6 | LITSII$q515==7, 1, 0)
+LITSII$education3categories <- LITSII$education1+2*LITSII$education2
+LITSII$education3categories[LITSII$q515<1]=NA
+summary(LITSII$education3categories)
+
+
+# djankov
+LITSII$education1 <- ifelse(LITSII$q515==3 | LITSII$q515==4, 1, 0)
+LITSII$education2 <- ifelse(LITSII$q515==5,1, 0)
+LITSII$education3 <- ifelse(LITSII$q515==6 | LITSII$q515==7, 1, 0)
+LITSII$education4categories <- LITSII$education1+2*LITSII$education2+3*LITSII$education3
+LITSII$education4categories[LITSII$q515<1]=NA
+summary(LITSII$education4categories)
+
+# Nikolova/Sanfey
+LITSII$education6categories <- LITSII$q515
+LITSII$education6categories[LITSII$q515==7]=6
+LITSII$education6categories[LITSII$q515<1]=NA
+summary(LITSII$education6categories)
+
+
+
+
+```
+
+```{r frequent income, include=FALSE}
+#4.  The frequent Control Variable (4 out of 5) - Income
+#income: Income of the respondent's household, as measured on a 10-step income ladder; LiTS 2010 q227
+
+LITSII$income <- LITSII$q227
+LITSII$income[LITSII$q227<1]=NA
+summary(LITSII$income)
+```
+
+```{r eliminating Kosovo, include=FALSE}
+#5.  Sample Restrictions
+
+##removing Kosovo from data, following what Kijewski has done in their analysis  
+LITSII$nokosovo<-(LITSII$country!=193)*1
+summary(LITSII$nokosovo)
+```
+
+```{r eliminating older population, include=FALSE}
+# note that Ivlevs sample is also restricted by the migration question
+# we will include that restriction in the replication but not in the specification testing as no sense when just interested in first stage of IV
+LITSII$under65<-(LITSII$respondentage<65)*1
+summary(LITSII$under65)
+
+LITSII$under65migration<-ifelse(LITSII$respondentage<65 & LITSII$q708>0,1,0)
+summary(LITSII$under65migration)
+
+
+```
+
+```{r restricting sample to 15 countries, include=FALSE}
+LITSII$sample15<-ifelse(LITSII$country_=='Belarus'|LITSII$country_=='Bulgaria'|LITSII$country_=='Czech Republic'|LITSII$country_=='Estonia'|LITSII$country_=='Hungary'|LITSII$country_=='Latvia'|LITSII$country_=='Lithuania'|LITSII$country_=='Moldova'|LITSII$country_=='Poland'|LITSII$country_=='Romania'|LITSII$country_=='Russia'|LITSII$country_=='Serbia'|LITSII$country_=='Slovak Republic'|LITSII$country_=='Slovenia'|LITSII$country_=='Ukraine',1,0)
+summary(LITSII$sample15)
+```
+
+```{r restricting sample to alsoLITSIII, include=FALSE}
+#are not included in LITSIII
+
+# not in LITSIII
+#"France" 61
+#"Great Britain" 66
+#"Sweden" 162
+
+LITSII$samplealsoLITSIII<-ifelse(LITSII$country==61|LITSII$country==66|LITSII$country==162,0,1)
+summary(LITSII$samplealsoLITSIII)
+```
+
+```{r additional world bank data, include=FALSE}
+#6.  Loading additional datasets
+
+#library(readxl)
+#worldbank <- read_excel("Pdrive/R backup/replications 2024 bu/world bank data.xlsx")
+
+#worldbank[35,'country']=193 # to add Kosovo for which no data exist
+#summary(LITSII$country)
+##merge datasets of LITSII and worldbank data by country (country code not name) to include in working dataset
+#LITSII <- merge(worldbank, LITSII, by="country", all.x = TRUE)
+
+#For the sake of interpretation, the country-level variables are standardized in the final models.\[p1262\]
+library(dplyr)
+library(WDI)
+z<-LITSII %>%
+    group_by(country_) %>%
+    summarise_at(vars(country), list(name = mean))
+
+
+LITSII$LifeExpectancy<-0
+
+countrycodes=c('AL','AM', 'AZ', 'BY','BA','BG','HR','CZ','EE','FR','GE','DE','GB','HU','IT','KZ', 'XK', 'KG', 'LV','LT','MK','MD','MN','ME', 'PL', 'RO', 'RU','RS','SK','SI','SE','TJ','TR','UA','UZ')
+
+dat = WDI(indicator='SP.DYN.LE00.IN', country=countrycodes, start=2010, end=2010)
+
+for (i in 1:35)
+{
+LITSII$LifeExpectancy[LITSII$country==unname(unlist(z[i,'name']))]=dat[dat$iso2c==countrycodes[i],'SP.DYN.LE00.IN']
+}
+
+
+LITSII$Population<-0
+
+dat = WDI(indicator='SP.POP.TOTL', country=countrycodes, start=2008, end=2010)
+
+for (i in 1:35)
+{
+LITSII$Population[LITSII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'SP.POP.TOTL'],na.rm = TRUE)
+}
+
+
+
+LITSII$GDPPC<-0
+
+dat = WDI(indicator='NY.GDP.PCAP.CD', country=countrycodes, start=2008, end=2010)
+
+for (i in 1:35)
+{
+LITSII$GDPPC[LITSII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'NY.GDP.PCAP.CD'],na.rm = TRUE)
+}
+
+
+
+LITSII$Unemployment<-0
+
+dat = WDI(indicator='SL.UEM.TOTL.NE.ZS', country=countrycodes, start=2008, end=2010)
+
+for (i in 1:35)
+{
+LITSII$Unemployment[LITSII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'SL.UEM.TOTL.NE.ZS'],na.rm = TRUE)
+}
+
+
+
+LITSII$Population <-(LITSII$Population - summary(LITSII$Population)['Mean'])/sd(LITSII$Population, na.rm=TRUE)
+
+LITSII$GDPPC <-(LITSII$GDPPC - summary(LITSII$GDPPC)['Mean'])/sd(LITSII$GDPPC, na.rm=TRUE)
+
+LITSII$Unemployment <-(LITSII$Unemployment - summary(LITSII$Unemployment)['Mean'])/sd(LITSII$Unemployment, na.rm=TRUE)
+
+
+LITSII$LifeExpectancy <-(LITSII$LifeExpectancy - summary(LITSII$LifeExpectancy)['Mean'])/sd(LITSII$LifeExpectancy, na.rm=TRUE)
+
+```
+
+```{r  Adding PSU longitude/latitude/altitude , include=FALSE}
+
+Eastpsu<- read_dta("psu_geography.dta")
+
+westeuropepsucoordinates <- read_dta("West_europe_psu_coordinates.dta")
+
+#the below might be needed if dplyr refuses to load 
+#remove.packages("rlang")
+#install.packages("rlang")
+#library(rlang)
+library(dplyr)
+westeuropepsucoordinates <- westeuropepsucoordinates %>%
+  rename(latitudepsu = latitude_west,
+         longitudepsu = longitude_west,
+         altitudepsu = altitudemetres_west)
+
+# create unique psu info
+# Sort the data by country, psu, latitudepsu, longitudepsu, and altitudepsu
+Eastpsu <- Eastpsu[order(Eastpsu$country, Eastpsu$psu, Eastpsu$latitudepsu, Eastpsu$longitudepsu, Eastpsu$altitudepsu), ]
+
+# Create a variable indicating duplicates
+Eastpsu$dup <- ifelse(duplicated(Eastpsu[, c("country", "psu", "latitudepsu", "longitudepsu", "altitudepsu")]), 1, 0)
+
+# Keep only non-duplicate observations
+Eastpsu <- Eastpsu[Eastpsu$dup < 1, ]
+
+# Drop observations with country codes 61, 64, 66, 84, and 162
+Eastpsu <- Eastpsu[!(Eastpsu$country %in% c(61, 64, 66, 84, 162)), ]
+
+# combine - first select only variables available in both datasets
+Eastpsu<-Eastpsu[,c("country","psu","latitudepsu" ,"longitudepsu","altitudepsu")]
+westeuropepsucoordinates<-westeuropepsucoordinates[,c("country","psu","latitudepsu" ,"longitudepsu","altitudepsu")]
+coord<-rbind(data.frame(Eastpsu), data.frame(westeuropepsucoordinates))
+
+# merge the data 
+LITSII <- merge(coord,LITSII, by = c("country", "psu"), all.x = TRUE)
+
+#LITSII<-LITSII[complete.cases(LITSII$altitudepsu),]
+#LITSII<-LITSII[complete.cases(LITSII$longitudepsu),]
+#LITSII<-LITSII[complete.cases(LITSII$latitudepsu),]
+#dim(LITSII)
+```
+
+```{r all kijewski additional variables, include=FALSE}
+#7.  unique variables
+
+
+#creating occupation factors. Used International Standard Classification of Occupations to group the numbered answers in the data into the corresponding categories of workers. The categories were pre screened into the relevant type of job prior
+
+# note category 11 is split up in employmentstatus 1 and 2  so 11 will be droppped in Kijewski where both are included. 
+
+LITSII$professionals <- ifelse(LITSII$q505m > 0 & LITSII$q505m < 13, 1, 0)
+LITSII$managers <- ifelse(LITSII$q505m > 12 & LITSII$q505m < 15, 1, 0)
+LITSII$clericalworkers <- ifelse(LITSII$q505m > 14 & LITSII$q505m < 18, 1, 0)
+LITSII$servicesandsalesworkers <- ifelse((LITSII$q505m > 17 & LITSII$q505m < 22) | (LITSII$q505m > 60 & LITSII$q505m < 71), 1, 0)
+LITSII$agriculture <- ifelse(LITSII$q505m > 21 & LITSII$q505m < 27, 1, 0)
+LITSII$plantoperators <- ifelse(LITSII$q505m > 26 & LITSII$q505m < 31, 1, 0)
+LITSII$transport <- ifelse(LITSII$q505m > 30 & LITSII$q505m < 41, 1, 0)
+LITSII$building <- ifelse(LITSII$q505m > 40 & LITSII$q505m < 51, 1, 0)
+LITSII$crafts <- ifelse(LITSII$q505m > 50 & LITSII$q505m < 61, 1, 0)
+LITSII$unidentified <- ifelse(LITSII$q505m > 70, 1, 0)
+LITSII$notinlabormkt <- ifelse(LITSII$q505m == -90, 1, 0)
+LITSII$occupation<-LITSII$professionals+(2*LITSII$managers)+(3*LITSII$clericalworkers)+(4*LITSII$servicesandsalesworkers)+(5*LITSII$agriculture)+(6*LITSII$plantoperators)+(7*LITSII$transport)+(8*LITSII$building)+(9*LITSII$crafts)+(10*LITSII$unidentified)+(11*LITSII$notinlabormkt)
+LITSII$occupation[LITSII$q505m==-1]=NA
+summary(LITSII$occupation)
+table(LITSII$occupation)
+
+
+#church attendance
+##creating a dummy variable with those who are not an active member of church as the base/reference variable
+
+
+LITSII$religion <- ifelse(LITSII$q713a == 1, 1, 0)
+LITSII$religion[LITSII$q713a<1]=NA
+summary(LITSII$religion)
+
+
+
+#civil activity
+##civil active variable, removing those not active in civil activity from each type of voluntary organisation or group to include only relevant data (i.e. not missing)
+
+##summing the amount of people that are active in each type of voluntary organization (i.e. is an active member of each of the groups)
+LITSII$civilsum <- with(LITSII, q713b==1) + with(LITSII, q713c==1) + with(LITSII, q713d==1) + with(LITSII, q713e==1) + with(LITSII, q713f==1) + with(LITSII, q713g==1) + with(LITSII, q713h==1)
+LITSII$civil <- ifelse(LITSII$civilsum>0, 1, 0)
+
+LITSII$civil[LITSII$q713b<1|LITSII$q713c<1|LITSII$q713d<1|LITSII$q713e<1|LITSII$q713f<1|LITSII$q713g<1|LITSII$q713h<1]=NA
+table(LITSII$civil)
+summary(LITSII$civil)
+```
+
+```{r childs unique variables, include=FALSE}
+# Mother's education: Years of respondent's mother's full-time education; LiTS 2010 q.719.
+LITSII$motherseducation <- LITSII$q719
+LITSII$motherseducation[LITSII$q719<0]=NA
+summary(LITSII$motherseducation)
+
+#communist: whether the respondent or any members of his/her family were members of the communist party. q714a/b/c/d
+
+LITSII$communist <- ifelse(LITSII$q714a==1 | LITSII$q714b==1|LITSII$q714c==1|LITSII$q714d==1,1,0)
+LITSII$communist [LITSII$q714a<0 | LITSII$q714b<0|LITSII$q714c<0|LITSII$q714d<0]=NA
+summary(LITSII$communist)
+
+
+
+# ever moved (q705 is how long you lived in your current place - all life is 98)
+LITSII$moved <- ifelse(LITSII$q705!=98,1,0)
+LITSII$moved[LITSII$q705< -0.01]=NA
+summary(LITSII$moved)
+
+
+LITSII$urbanrural <- LITSII$tablec
+LITSII$urban <- ifelse(LITSII$tablec==1|LITSII$tablec==3,1,0)
+LITSII$urban[LITSII$tablec<1]=NA
+summary(LITSII$urban)
+
+#RegionDummies: variable Region1 (alternative would be Locality)
+
+```
+
+```{r ivlevs unique variables, include=FALSE}
+#minority
+
+LITSII$minority <-ifelse(LITSII$country_=='Albania' & (LITSII$q717_1==1|LITSII$q717_1==14)|LITSII$country_=='Armenia' & LITSII$q717_1==2|LITSII$country_=='Azerbaijan' & LITSII$q717_1==32|LITSII$country_=='Belarus' & (LITSII$q717_1==3|LITSII$q717_1==22)|LITSII$country_=='Bosnia' & (LITSII$q717_1==4|LITSII$q717_1==6|LITSII$q717_1==23)|LITSII$country_=='Bulgaria' & LITSII$q717_1==5|LITSII$country_=='Croatia' & LITSII$q717_1==6|LITSII$country_=='Czech Republic' & LITSII$q717_1==7|LITSII$country_=='Estonia' & LITSII$q717_1==9|LITSII$country_=='France' & LITSII$q717_1==10|LITSII$country_=='Georgia' & LITSII$q717_1==33|LITSII$country_=='Germany' & LITSII$q717_1==11|LITSII$country_=='Great Britain' & LITSII$q717_1==40|LITSII$country_=='Hungary' & LITSII$q717_1==12|LITSII$country_=='Italy' & LITSII$q717_1==13|LITSII$country_=='Kazakhstan' & (LITSII$q717_1==37|LITSII$q717_1==22)|LITSII$country_=='Kosovo'&(LITSII$q717_1==1|LITSII$q717_1==14|LITSII$q717_1==23)|LITSII$country_=='Kyrgyzstan' &(LITSII$q717_1==38|LITSII$q717_1==22)|LITSII$country_=='Latvia' & LITSII$q717_1==15|LITSII$country_=='Lithuania' & LITSII$q717_1==16|LITSII$country_=='Macedonia' & LITSII$q717_1==17|LITSII$country_=='Moldova' & LITSII$q717_1==19|LITSII$country_=='Mongolia' & LITSII$q717_1==39|LITSII$country_=='Montenegro' & LITSII$q717_1==20|LITSII$country_=='Poland' & LITSII$q717_1==21|LITSII$country_=='Romenia' & LITSII$q717_1==19|LITSII$country_=='Russia' & LITSII$q717_1==22|LITSII$country_=='Serbia' & LITSII$q717_1==23|LITSII$country_=='Slovakia' & LITSII$q717_1==8|LITSII$country_=='Slovenia' & LITSII$q717_1==24|LITSII$country_=='Sweden' & LITSII$q717_1==25|LITSII$country_=='Tajikistan' & (LITSII$q717_1==35|LITSII$q717_1==22)|LITSII$country_=='Turkey' & LITSII$q717_1==26|LITSII$country_=='Ukraine' & LITSII$q717_1==31|LITSII$country_=='Uzbekistan' & LITSII$q717_1==34,0,1)
+summary(LITSII$minority)
+
+
+#having children (in HH)
+
+LITSII$children<-ifelse(LITSII$Children>0,1,0)
+summary(LITSII$children)
+
+# assets
+# extracting the first principal component
+LITSII$assets<-prcomp(select(LITSII,q225a,q225b,q225c,q225d,q225e,q225f,q225g,q225h), scale=TRUE, center=TRUE)$x[,1]
+
+
+# financial satisfaction
+LITSII$finsat <- LITSII$q301k 
+LITSII$finsat[LITSII$q301k<1]=NA
+LITSII$finsat[LITSII$q301k>5]=NA
+summary(LITSII$finsat)
+
+#"I construct a migrant networks dummy which is equal to 1 if at least one of the following is true: 1) respondent's household experienced a crisis-related fall in remittances; and 2) a household member returned from abroad due to the crisis."
+
+# -90 is crisis didnt affect at all so no need to exclude
+#LITSII<-subset(LITSII, LITSII$q802ag>-1)
+#LITSII<-subset(LITSII, LITSII$q802ah>-1)
+LITSII$network <- ifelse(LITSII$q802ag==1|LITSII$q802ah==1,1,0) 
+summary(LITSII$network)
+```
+
+```{r djankov unique , include=FALSE}
+
+##eastern europe variable, grouping non eastern european countries and making a dummy variable where all non-eastern european countries are equal to 0 and otherwise 1 
+LITSII$easteurope <- ifelse(LITSII$country == 61 | LITSII$country == 64 | LITSII$country == 84 | LITSII$country == 162 | LITSII$country == 174 | LITSII$country == 66, 0, 1) 
+table(LITSII$easteurope)
+```
+
+```{r kijewski regressions, include=FALSE}
+####Replicating @Kijewski2020
+
+#install.packages("lme4")
+library("lme4")
+options(scipen=999)
+
+kijewskireplication <- lmer(lifesatisfaction110 ~ WW2injury+ WW2moved  + yob + agesqst + female + as.factor(maritalstatus) + education + fatherseducation + as.factor(employmentstatus) + as.factor(occupation) + health + religion + civil + GDPPC + Unemployment + Population + LifeExpectancy + (1 | country), data = LITSII[LITSII$nokosovo==1,])
+
+
+summary(kijewskireplication)
+
+```
+
+```{r childs regressions, include=FALSE}
+#### Replicating @ChildNikolova2020
+
+library(estimatr)  
+
+model_lmrobust_clustered <- lm_robust(lifesatisfaction110 ~ WW2injury+longitudepsu+latitudepsu, se_type = "stata",fixed_effects = ~ Region1,weights=XCweight,data = LITSII[LITSII$sample15==1,],clusters = Region1)
+summary(model_lmrobust_clustered)
+
+
+
+
+library(estimatr)  
+
+childsreplication <- lm_robust(lifesatisfaction110 ~ WW2injury + WW2moved+male+health + employeddummy + income +as.factor(education3categories)  + fatherseducation+motherseducation+ communist+moved+longitudepsu+latitudepsu+urban+ married + age +agesq,
+                                      
+                                      se_type = "stata",
+                                      fixed_effects = ~ Region1,weights=XCweight,
+                                      data = LITSII[LITSII$sample15==1,],clusters = Region1)
+summary(childsreplication)
+
+
+```
+
+```{r ivlevs regressions, include=FALSE}
+#### Replicating @Ivlevs2015
+
+library(estimatr)  
+
+ivlevsreplication <- lm_robust(lifesatisfaction110 ~ WW2injury +female + age1824 + age2534 +age4554+age5564 +as.factor(maritalstatusivlevs) +children + minority +as.factor(education3categories) +assets+ income +finsat + employeddummy + healthgood +healthbad + network+fatherseducation + as.factor(urbanrural),
+                                      se_type = "stata",
+                                      fixed_effects = ~ country,weights=XCweight,
+                                      data = LITSII[LITSII$under65migration==1,],clusters = Locality)
+summary(ivlevsreplication)
+```
+
+```{r Nikolova regression s2, include=FALSE}
+#### Replicating @NikolovaSanfey2016
+
+library(estimatr)  
+
+nikolovareplication1 <- lm_robust(lifesatisfaction110to15~WW2any+health + married + age +agesq+male+education6categories+ income + employeddummy + fatherseducation,
+                                      
+                                      se_type = "stata",
+                                      fixed_effects = ~ country,weights=XCweight,
+                                      data = LITSII,clusters = country_)
+summary(nikolovareplication1)
+```
+
+```{r nikolova regression s1, include=FALSE}
+
+#model_lmweights <- lm(S2~health + married + age +age2+male+education+ income + employed + fatherseducation+affectedbywar+as.factor(country), weights=weight,data = LITSIInew)
+
+#summary(model_lmweights)
+
+#library(lmtest)
+#library(multiwayvcov)
+
+#vcov_both_formula <- cluster.vcov(model_lmweights, ~ country)
+
+#coeftest(model_lmweights, vcov_both_formula)
+
+
+library(estimatr)  
+
+nikolovareplication2 <- lm_robust(lifesatisfaction15~WW2any+health + married + age +agesq+male+education6categories+ income + employeddummy + fatherseducation,
+                                      
+                                      se_type = "stata",
+                                      fixed_effects = ~ country,weights=XCweight,
+                                      data = LITSII,clusters = country_)
+summary(nikolovareplication2)
+```
+
+```{r djankov regression , include=FALSE}
+#### Replicating @Djankovetal2016
+
+library(estimatr)  
+
+
+
+djankovreplication <- lm_robust(lifesatisfaction15~WW2any+health + married + respondentage + agesq + male +as.factor(education4categories) + income + employmentstatus + fatherseducation  + easteurope+latitudepsu+longitudepsu+altitudepsu,
+                                      se_type = "stata",
+                                      weights=XCweight,
+                                      data = LITSII,clusters = country_)
+summary(djankovreplication)
+
+
+```
+
+Given the evidence of a replication crisis in the social sciences (@Baker2016, @Reed2018), we want to make sure the conflicting findings reported by various papers are not the results of typos in the published versions or errors in the computer codes used to generate these findings. We therefor replicate the key regressions of these papers by following the descriptions of the method, included variables and construction of the variables, provided in the papers.
+
+Table II shows, for each study, the published effect size of the impact of experiencing injury/death during World War II, the p-value and sample size (columns I to III), followed by the effect size, p-value and sample size we get when we replicate these papers' key regressions.
+
+```{r djankov table, include=FALSE}
+tab <- matrix(c(-0.108, 'p<0.01', 25618, round(summary(kijewskireplication)$coefficients[2,1],3)
+ ,ifelse(2*pt(summary(kijewskireplication)$coefficients[2,3], df=nobs(kijewskireplication), lower.tail=sign(summary(kijewskireplication)$coefficients[2,3])==-1)<0.01, 'p<0.01', ifelse(2*pt(summary(kijewskireplication)$coefficients[2,3], df=nobs(kijewskireplication), lower.tail=sign(summary(kijewskireplication)$coefficients[2,3])==-1)<0.05,'p<0.05','p>0.1')), nobs(kijewskireplication),-0.006, 'p>0.1', 9538, round(summary(childsreplication)$coefficients[1,1],3) ,ifelse(summary(childsreplication)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(childsreplication)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(childsreplication)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(childsreplication)$nobs, 0.071, 'p<0.05', 24070,round(summary(ivlevsreplication)$coefficients[1,1],3) ,ifelse(summary(ivlevsreplication)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(ivlevsreplication)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(ivlevsreplication)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(ivlevsreplication)$nobs, 0.0241 , 'p>0.1', 25666,round(summary(nikolovareplication1)$coefficients[1,1],3) ,ifelse(summary(nikolovareplication1)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(nikolovareplication1)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(nikolovareplication1)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(nikolovareplication1)$nobs, 0.00630, 'p>0.1', 25427,round(summary(nikolovareplication2)$coefficients[1,1],3) ,ifelse(summary(nikolovareplication2)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(nikolovareplication2)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(nikolovareplication2)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(nikolovareplication2)$nobs, -0.008, 'p>0.1', 24836,round(summary(djankovreplication)$coefficients[2,1],3) ,ifelse(summary(djankovreplication)$coefficients[2,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(djankovreplication)$coefficients[2,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(djankovreplication)$coefficients[2,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(djankovreplication)$nobs), ncol=6, byrow=TRUE)
+colnames(tab) <- c('Original Effect Size','Original P value','Original Sample Size','Replication Effect Size','Replication P value', 'Replication Sample Size')
+rownames(tab) <- c('Kijewski 2020','Childs and Nikolova 2020', 'Ivlevs 2015', 'Nikolova and Sanfey 2016 (I)', 'Nikolova and Sanfey 2016 (II)', 'Djankov et al. 2016')
+tab2 <- as.table(tab)
+tab2
+```
+
+```{r include=FALSE}
+library(gt)
+gt_tbl <- gt(as.data.frame(tab), rownames_to_stub = TRUE)
+gt_tbl|>cols_align(align = c("center"),columns = everything()
+)|>tab_header( 'Table II: Replicating the Literature', subtitle = NULL, preheader = NULL)
+# Show the gt Table
+#gt_tbl
+gt_tbl |> gtsave("tab_2.png")
+```
+
+![](tab_2.png)
+
+Table II shows that the replicated results for @Kijewski2020, @NikolovaSanfey2016 and @Djankovetal2016 are almost identical to the published results. There are a couple of minor exceptions: like @ChildNikolova2020, we find an insignificant effect, but the replicated effect size is considerably more negative. Like @Ivlevs2015, we find a positive estimate. However, unlike @Ivlevs2015, who found statistical significance at the 5% level, we only find the estimated effect to be significant at the 11% significance level.
+
+Overall, we successfully replicate the literature estimating the impact of experiencing World War II on life satisfaction, finding a negative estimate when the original authors find a negative estimate and a positive estimate when the original authors find a positive estimate. In terms of statistical significance, we also come to the same conclusion as the original authors, except for @Ivlevs2015 for which we find slightly weaker evidence that the effect is significantly positive.
+
+## III. A Specification Curve Analysis.
+
+To further explore the reasons why different authors find different estimates, we conduct a specification curve or multiverse analysis (@Simonsohn2020, @Steegen2016).
+
+The papers we replicated all use the same dataset. However, the authors use this same dataset in many ways[^2]. As explained in the introduction, there are differences in what measure of life satisfaction gets selected (1-5 scale versus 1-10 scale[^3]) and in how the war variable gets included (only the variable reflecting injuries/death included, the displacement-by-war variable also included, or both variables aggregated into one single measure of war experience).
+
+[^2]: One reason for the difference in methodological choices could be differences in the goal of the analysis: @Kijewski2020 and @ChildNikolova2020 focuse on the impact of war on life satisfaction. @Ivlevs2015 uses war as an instrumental variable for life satisfaction, while focusing on what drives migration decisions. @Djankovetal2016 and @NikolovaSanfey2016 use war as a control variable in a happiness regression, while focusing on the happiness gap between transition and non-transition countries, and differences across various measures of life satisfaction respectively.
+
+[^3]: The 1-10 scale comes from the question: "All things considered, how satisfied or dissatisfied are you with your life as a whole -these days? Please answer on a scale from 1 to 10, where 1 means completely dissatisfied and 10 means completely satisfied." The 1 to 5 scale comes from the question: 'All things considered, I am satisfied with my life now', with 1 meaning strongly disagree and 5 meaning strongly agree.
+
+Some of the control variables are common to all studies. All studies include variables capturing the age, gender, employment status, marital status, and health status of the respondent. They also include measures of the education of the respondent and the respondent's father. All but @Kijewski2020 include income as a control variable. However, there are small differences in how authors include these variables: for example, some include dummies for all categories of education while others aggregate educational attainment into wider categories.
+
+Besides the common set of control variables, there are many idiosyncratic variable choices. @Kijewski2020 controls for occupation, and religious and civic involvement. @ChildNikolova2020 controls for mother's education, whether the respondent or family members had been members of the communist party, whether the respondent had ever moved, and for rural/urban differences. @Ivlevs2015 controls for minority status, rural/urban/metropolitan status, whether there are children in the household, the presence of a migration network, differences in assets and differences in financial satisfaction.
+
+The authors also chose different ways to capture geographic differences. Some include country fixed effects (@Ivlevs2015, @NikolovaSanfey2016), others include in-country region-specific fixed effects (@ChildNikolova2020) while yet others include country random effects in addition to country-level characteristics like unemployment or per capita GDP (@Kijewski2020), or just country-level characteristics such as whether the country was a transition country (@Djankovetal2016).
+
+Studies differ on whether they cluster standard errors and in whether or not they weigh observations. @Kijewski2020 does not cluster standard errors nor uses survey weights. All others use within country population weights (which makes the sample representative for each country, but also gives each country equal weight overall) and cluster standard errors at the level of country, region, or locality.
+
+Finally, studies differ in which observations they included: @Ivlevs2015 focuses on those who are less than 65 years old, @Kijewski2020 excludes Kosovo, while @ChildNikolova2020 focus on 15 countries that were heavily affected by World War II.
+
+To illustrate the impact of methodological differences, @Simonsohn2020 suggest to start from the "set of theoretically justified, statistically valid, and non-redundant specifications". In this study, we use the specifications chosen by the five papers as the starting point for our set. While not necessarily exhaustive, given the choices underlying these specifications have all been deemed acceptable by these authors, the referees who reviewed these papers and the editors who decided to accept these papers for publication, the specifications based on these choices all can be considered 'reasonable'.
+
+More specifically, we use the five weights, clustering, and fixed effect choices of the papers. We vary what dependent variable is used (1-5 scale versus 1-10 scale), and what sub-population is used (15 heavily affected countries only, only under 65-year-olds, or a combination of these two). We include the common control variables in all specifications[^4] but vary the set of additional controls: a set of income-related variables (income, satisfaction with one's financial situation, a proxy for assets), a set of additional war experiences (moved during World War II, moved because of recent conflict, injured during recent conflict, injured/killed household members during recent conflict), a set of all remaining controls, and any combination of the aforementioned sets.
+
+[^4]: We use the most flexible specification of this common set. That is, we do not aggregate categories of categorical variables. We do not include a subset that excludes Kosovo because Kosovo represents a very small share of the overall sample (about 3%).
+
+```{r  specification curve start, include=FALSE}
+
+# we change thet category for under65 to 0 and 65 rather than 0 and 1
+# this is for the subsetting below - if two 0-1 dummy variables used for subsetting they are mixed under the 1 header
+LITSII$under65<-LITSII$under65*65
+```
+
+```{r  princ comp of satisfaction, include=FALSE}
+# one could try to increase precision by getting a better measure of
+# lifesatisfaction, smth that takes both measures of life satisfaction into account
+# so i compute first principle component
+# prcom cannot handle NA so put missing at mean
+LITSII$lifesatisfaction110pc<-LITSII$lifesatisfaction110
+LITSII$lifesatisfaction110pc[is.na(LITSII$lifesatisfaction110)]=mean(LITSII$lifesatisfaction110[!is.na(LITSII$lifesatisfaction110)])
+
+LITSII$lifesatisfaction15pc<-LITSII$lifesatisfaction15
+LITSII$lifesatisfaction15pc[is.na(LITSII$lifesatisfaction15)]=mean(LITSII$lifesatisfaction15[!is.na(LITSII$lifesatisfaction15)])
+
+LITSII$lifesatisfactionpc1<-prcomp(select(LITSII,"lifesatisfaction110pc","lifesatisfaction15pc"), scale=TRUE, center=TRUE)$x[,1]
+# since pc1 is negative correlation with LS measures i flip sign
+LITSII$lifesatisfactionpc1<- -LITSII$lifesatisfactionpc1
+LITSII$lifesatisfactionpc1[is.na(LITSII$lifesatisfaction110)]=NA
+LITSII$lifesatisfactionpc1[is.na(LITSII$lifesatisfaction15)]=NA
+summary(LITSII$lifesatisfactionpc1)
+
+# this pc1 can be included as dep var in specification analysis
+# tried this but didnt lead to more significance or different results so
+# not discussed in paper
+
+```
+
+```{r  specification curve, include=FALSE}
+
+#install.packages("specr")  
+#install.packages("broom.mixed`") 
+library(specr)
+library(broom.mixed)
+library("tidyverse")
+library(ggplot2)
+library(fixest)
+
+
+table(LITSII$under65)
+
+
+Kijewski2020 <- function(formula, data,...) {
+  require(lme4)
+  require(broom.mixed)
+  formula <- paste(formula, "+ (1|country)")
+  lmer(formula, data)
+}
+
+ChildsNikolova2020 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "|Region1"))
+  feols(formula,  cluster=~Region1, weights=~XCweight, data = data)
+}
+
+Ivlevs2015 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~Locality, weights=~XCweight, data = data)
+}
+
+
+NikolovaSanfey2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+Djankovetal2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+
+
+# all controls together
+#"as.factor(occupation) + religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy+ motherseducation+ communist+moved+as.factor(urbanrural)+children+ minority+network+assets+finsat + easteurope + latitudepsu+longitudepsu+altitudepsu ","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2moved","income"
+
+
+#               controls = c("as.factor(occupation) + religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy","motherseducation+ communist+moved+as.factor(urbanrural)+longitudepsu+altitudepsu","children+ minority+network+assets+finsat+as.factor(urbanrural)", "easteurope + latitudepsu+longitudepsu+altitudepsu","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2moved","income"),
+specs <- setup(data = LITSII,
+                y = c("lifesatisfaction110","lifesatisfaction15"),
+                x = c("WW2injury"),
+               subset=list(sample15 = c(1), under65 = c(65)),
+                model = c("Kijewski2020", "ChildsNikolova2020","Ivlevs2015","NikolovaSanfey2016", "Djankovetal2016"),
+               controls = c("as.factor(occupation) + religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy+ motherseducation+ communist+moved+as.factor(urbanrural)+children+ minority+network + easteurope + latitudepsu+longitudepsu+altitudepsu ","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2moved","income+assets+finsat"), add_to_formula = "age + agesq + female+as.factor(maritalstatus)+ as.factor(education) + fatherseducation + as.factor(employmentstatus) + health", simplify=FALSE)
+
+results <- specr(specs)  
+print(results$data)
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub( tom[10], 'War Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[5],'Other Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[15],'Income', controls, fixed = TRUE))
+
+#results$data<-results$data%>% #mutate(tom=results$data%>%pull(controls),controls= gsub( #'income+assets+finsat', 'Income', controls, fixed = TRUE))
+
+
+
+results$data<-results$data%>% mutate(tom= grepl( '1 & 65', subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five in heavily affected countries only",subsets)) 
+
+
+results$data<-results$data%>% mutate(tom= grepl( 65, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five",subsets)) 
+
+results$data<-results$data%>% mutate(tom= grepl( 1, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Heavily affected countries only",subsets)) 
+
+
+```
+
+```{r adding nrs to text, include=FALSE}
+
+a1<-dim(results$data)[1]
+a2<-round(100*(sum(results$data['estimate']<0)/320))
+a3<-deframe(round(summarise(results$data, median(estimate)),2))
+
+a4<-round(100*(sum(results$data['conf.high']<0)/320),1)
+
+a5<-round(sd(LITSII$lifesatisfaction110[!is.na(LITSII$lifesatisfaction110)]),2)
+a6<-round(sd(LITSII$lifesatisfaction15[!is.na(LITSII$lifesatisfaction15)]),2)
+
+a7<-deframe(round(quantile(results$data['estimate'][results$data['y']=='lifesatisfaction110'])[3],3))
+a8<-deframe(round(quantile(results$data['estimate'][results$data['y']=='lifesatisfaction15'])[3],3))
+
+a9<-deframe(deframe(round(summarise(results$data,quantile(estimate,0.05)),2)))
+a10<-deframe(deframe(round(summarise(results$data,quantile(estimate,0.95)),2)))
+```
+
+Figure I displays the specification curve, showing the `r a1` estimated effect sizes (and their confidence intervals) of the dummy variable measuring whether or not the respondent, or a family member, was injured or killed during World War II.[^5] Estimates are ordered from smallest to biggest, with statistically significant estimates at the 5% significance level highlighted in red (if negative) or blue (if positive). About `r a2`% of these estimates are negative. A substantial part of the negative estimates is statistically significant (`r a4`% overall) but none of the positive estimates are statistically significant.
+
+[^5]: We use the specr R package (@Masur2020) for the specification analysis and the Stargazer package for the regression output (@Hlavac2022)
+
+Overall, the median estimate is `r a3`. Focusing on those specifications that use the 1-10 life satisfaction scale, the median estimate is `r a7`, those using the 1-5 life satisfaction scale `r a8`. These are small effect sizes when compared to the standard deviation of the 1-10 scale (`r a5`) or the 1-5 scale (`r a6`). And even the 5% percentile estimate (`r a9`) and 95% percentile estimate (`r a10`) are small.
+
+Figure I: A Specification Curve for the Impact of Being Injured/Having Injured or Killed Relatives during World War II on Life Satisfaction.
+
+```{r results to show Ia, echo=FALSE}
+
+plot(results, type='curve', main = "Figure 1: Specification Curve")
+
+```
+
+Figure II shows how estimates differ across models, control variables included, sample restrictions and dependent variables. The biggest difference comes from controlling for income. Omitting the income variables drives the estimated coefficient of the injured/killed war variable downwards and increases the likelihood the estimate is statistically significant. In fact, none of the estimated effects are statistically significant if income variables are included as controls. This is noteworthy as @Kijewski2020 is the only study that does not include an income variable as a control and is the only study that finds a significant negative effect of the injured/killed war variable. There are good reasons to include income as a control variable as happiness regressions typically include income, allowing for money to 'buy' happiness. At the same time, one could argue that income is a 'bad' control: if the war variable affects income, controlling for income will obscure some of the effect of the war on life satisfaction. That being said, all five papers included health as a control variable, and like for income one could argue that war experience affects current health status, and hence, that health should not be included as a control.
+
+Figure II: What Affects the Estimated Effect Size of Being Injured/ Having Injured or Killed relatives during World War II.
+
+```{r results to show Ib, echo=FALSE}
+
+plot(results, type='choices', main = "Figure 2: Specification Curve - Choices")
+
+```
+
+Other factors matter much less. The regression of estimated effect sizes on the characteristics of the specifications in Table III shows that, keeping everything else constant, the model by @ChildNikolova2020 has somewhat smaller effect sizes than the models by @Djankovetal2016, @Ivlevs2015, @Kijewski2020 and @NikolovaSanfey2016. Similarly, using the 1-10 life satisfaction scale results in somewhat smaller estimates, while differences in who is included in the sample do not seem to affect the effect sizes much.
+
+```{r specification curve median and pos, include=FALSE}
+
+summary(results)
+sum(results$data['estimate']>0)/320
+sum(results$data['conf.low']<0)/320
+sum(results$data['conf.high']<0)/320
+
+library(jtools)
+tom<-lm(estimate~as.factor(model)+as.factor(subsets)+as.factor(controls)+as.factor(y), data=results$data)
+summary(tom)
+# for nice table?
+summ(tom)
+```
+
+```{r results to show Ic, echo=FALSE,  message = FALSE}
+
+library(stargazer)
+stargazer(tom, type='text', header=FALSE, title =" Table III - Correlates of the Estimated Effect Size", dep.var.labels=c("Estimate Size"), covariate.labels=c("model - Djankovetal2016","model - Ivlevs2015","model - Kijewski2020","model - NikolovaSanfey2016","subset- Heavily affected countries only","subset- Under sixty-five only","subset- Under sixty-five in heavily affected countries only", 'Controls - No Additional Controls','Controls - Other Controls','Controls - Other Controls + Income Controls','Controls - Other Controls + War Controls','Controls - Other controls + War Controls + Income Controls','Controls - War controls','Controls - War Controls+Income Controls','Dependent Variable Life Satisfaction Scale 1 to 5'))
+
+```
+
+## IV. What about other war variables.
+
+Until now we have focused on the impact of being injured or having injured or killed relatives during World War II. Now we will explore what affects the effect size of the variable that reflects whether the respondent's family moved because of World War II.
+
+```{r  specification curve moved, include=FALSE}
+
+#install.packages("specr")  
+#install.packages("broom.mixed`") 
+library(specr)
+library(broom.mixed)
+library("tidyverse")
+library(ggplot2)
+
+
+table(LITSII$under65)
+
+
+Kijewski2020 <- function(formula, data,...) {
+  require(lme4)
+  require(broom.mixed)
+  formula <- paste(formula, "+ (1|country)")
+  lmer(formula, data)
+}
+
+ChildsNikolova2020 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "|Region1"))
+  feols(formula,  cluster=~Region1, weights=~XCweight, data = data)
+}
+
+Ivlevs2015 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~Locality, weights=~XCweight, data = data)
+}
+
+
+NikolovaSanfey2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+Djankovetal2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+
+
+specs <- setup(data = LITSII,
+                y = c("lifesatisfaction110","lifesatisfaction15"),
+                x = c("WW2moved"),
+               subset=list(sample15 = c(1), under65 = c(65)),
+                model = c("Kijewski2020", "ChildsNikolova2020","Ivlevs2015","NikolovaSanfey2016", "Djankovetal2016"),
+controls = c("as.factor(occupation) + religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy+ motherseducation+ communist+moved+as.factor(urbanrural)+children+ minority+network + easteurope + latitudepsu+longitudepsu+altitudepsu ","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2injury","income+assets+finsat"), add_to_formula = "age + agesq + female+as.factor(maritalstatus)+ as.factor(education) + fatherseducation + as.factor(employmentstatus) + health")
+results <- specr(specs)  
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub( tom[10], 'War Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[5],'Other Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[15],'Income', controls, fixed = TRUE))
+
+
+
+results$data<-results$data%>% mutate(tom= grepl( '1 & 65', subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five in heavily affected countries only",subsets)) 
+
+
+results$data<-results$data%>% mutate(tom= grepl( 65, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five",subsets)) 
+
+results$data<-results$data%>% mutate(tom= grepl( 1, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Heavily affected countries only",subsets)) 
+
+
+plot(results,  main = "Figure 2: Specification Curve")
+
+
+summary(results)
+sum(results$data['estimate']>0)
+sum(results$data['conf.low']<0)
+sum(results$data['conf.high']<0)
+sum(results$data['conf.low']>0)
+sum(results$data['conf.high']>0)
+
+library(jtools)
+tom<-lm(estimate~as.factor(model)+as.factor(subsets)+as.factor(controls)+as.factor(y), data=results$data)
+summary(tom)
+# for nice table?
+summ(tom)
+```
+
+```{r adding nrs to text II, include=FALSE}
+
+a1<-dim(results$data)[1]
+a2<-round(100*(sum(results$data['estimate']>0)/320))
+a3<-deframe(round(summarise(results$data, median(estimate)),2))
+
+a4<-round(100*(sum(results$data['conf.high']<0)/320),1)
+
+a5<-round(sd(LITSII$lifesatisfaction110[!is.na(LITSII$lifesatisfaction110)]),2)
+a6<-round(sd(LITSII$lifesatisfaction15[!is.na(LITSII$lifesatisfaction15)]),2)
+
+a9<-deframe(deframe(round(summarise(results$data,quantile(estimate,0.05)),2)))
+a10<-deframe(deframe(round(summarise(results$data,quantile(estimate,0.95)),2)))
+
+```
+
+Interestingly, Figure III shows the effect of having moved to be mostly positive (`r a2`% positive, majority significantly so). The median of `r a3` is somewhat larger in absolute value than the median we found for the impact of being injured/killed, but still relatively small when compared to scale or standard deviation in the life satisfaction variable (`r a5` for the 1-10 scale and `r a6` for the 1-5 scale).
+
+Figure III: A Specification Curve for the Impact of Having Moved Because of World War II on Life Satisfaction.
+
+```{r results to show IIa, echo=FALSE}
+
+plot(results, type='curve', main = "Figure 1: Specification Curve")
+
+```
+
+Here again we find one factor that crucially affects conclusions: models using the 1-5 life satisfaction scale produce much smaller and less often significant effects, while most specifications using the 1-10 life satisfaction scale find a positive and significant effect.
+
+Figure IV: What Affects the Estimated Effect Size of Having Moved Because of World War II on Life Satisfaction.
+
+```{r results to show IIb, echo=FALSE}
+
+
+plot(results, type='choices', main = "Figure 2: Specification Curve - Choices")
+
+```
+
+```{r  specification curve moved output, include=FALSE}
+stargazer(tom, type='text',  header=FALSE, title =" Table 4 - Correlates of the estimated Effect Size of being displaced by World War 2", dep.var.labels=c("Estimate Size"), covariate.labels=c("model - Djankovetal2016","model - Ivlevs2015","model - Kijewski2020","model - NikolovaSanfey2016","subset- Heavily affected countries only","subset- Heavily affected countries only","subset- Under sixty-five only","subset- Under sixty-five in heavily affected countries only", 'controls - no additional controls','controls - Other controls','controls - Other controls + Income','controls - Other controls + War Controls','controls - Other controls + War Controls + Income','controls - War controls','controls - War controls+Income','Dependent Variable Life Satisfaction Scale 1 to 5'))
+
+```
+
+Finally, we also explored the specification curves for the three recent war variables: whether one was injured in a recent conflict, whether one moved because of a recent conflict and whether one has family members injured or killed because of a recent conflict. The effect size of these variables varied a lot but few specifications showed significant effects.
+
+```{r  specification curve recent , include=FALSE}
+# here modify the recent war among control /main variable of interest
+#install.packages("specr")  
+#install.packages("broom.mixed`") 
+library(specr)
+library(broom.mixed)
+library("tidyverse")
+library(ggplot2)
+
+
+table(LITSII$under65)
+
+
+Kijewski2020 <- function(formula, data,...) {
+  require(lme4)
+  require(broom.mixed)
+  formula <- paste(formula, "+ (1|country)")
+  lmer(formula, data)
+}
+
+ChildsNikolova2020 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "|Region1"))
+  feols(formula,  cluster=~Region1, weights=~XCweight, data = data)
+}
+
+Ivlevs2015 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~Locality, weights=~XCweight, data = data)
+}
+
+
+NikolovaSanfey2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+Djankovetal2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula))
+  feols(formula,  cluster=~country_, weights=~XCweight, data = data)
+}
+
+
+
+specs <- setup(data = LITSII,
+                y = c("lifesatisfaction110","lifesatisfaction15"),
+                x = c("recentwarinjury"),
+               subset=list(sample15 = c(1), under65 = c(65)),
+                model = c("Kijewski2020", "ChildsNikolova2020","Ivlevs2015","NikolovaSanfey2016", "Djankovetal2016"),
+               controls = c("as.factor(occupation) + religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy+ motherseducation+ communist+moved+as.factor(urbanrural)+children+ minority+network+assets+finsat + easteurope + latitudepsu+longitudepsu+altitudepsu ","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2moved+WW2injury","income"), add_to_formula = "age + agesq + female+as.factor(maritalstatus)+ as.factor(education) + fatherseducation + as.factor(employmentstatus) + health")
+results <- specr(specs)  
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub( tom[10], 'War Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[5],'Other Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub( 'income', 'Income', controls, fixed = TRUE))
+
+
+
+results$data<-results$data%>% mutate(tom= grepl( '1 & 65', subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five in heavily affected countries only",subsets)) 
+
+
+results$data<-results$data%>% mutate(tom= grepl( 65, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five",subsets)) 
+
+results$data<-results$data%>% mutate(tom= grepl( 1, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Heavily affected countries only",subsets)) 
+
+
+plot(results,  main = "Figure 1: Specification Curve")
+
+
+summary(results)
+sum(results$data['estimate']>0)
+sum(results$data['conf.low']<0)
+sum(results$data['conf.high']<0)
+
+library(jtools)
+tom<-lm(estimate~as.factor(model)+as.factor(subsets)+as.factor(controls)+as.factor(y), data=results$data)
+summary(tom)
+# for nice table?
+summ(tom)
+```
+
+## V. Replicating using the more recent LITS III data.
+
+So far, we worked with data from the second wave of the Life in Transition Survey. In 2016, a third wave was implemented. In this section, we analyse whether the conclusions of the original studies are upheld when the more recent data are used.
+
+The advantage of using the third wave is that the sample is bigger, with about 1500 respondents per country being interviewed, compared to about 1000 in the second wave. While most control variables used by the original studies are also available in the third wave, there are some exceptions. Most importantly, only one life satisfaction question, the one with the scale of 1 to 5, got asked in the third wave.
+
+```{r all data LITSIII, include=FALSE}
+#1.  The Dataset
+#Loading LITSII
+
+library(haven)
+LITSIII <- read_dta("LITSIII.dta", encoding = "latin1")
+
+```
+
+```{r all lifesatisfaction variables LITSIII , include=FALSE}
+#2.  The Dependent Variable
+
+# note in the below we putting missing/dk to NA
+
+
+#scale 1 - 5 variable
+LITSIII$lifesatisfaction15 <- LITSIII$q401e
+LITSIII$lifesatisfaction15[LITSIII$lifesatisfaction15<0]=NA
+summary(LITSIII$lifesatisfaction15)
+
+
+#happy dummy for agree/strongly agree (Obrizan)
+LITSIII$happy <- ifelse(LITSIII$q401e>3,1,0)
+summary(LITSIII$happy)
+LITSIII$happy[LITSIII$q401e<0]=NA
+summary(LITSIII$happy)
+
+```
+
+```{r all war variables LITSIII, include=FALSE}
+
+#3.  The Main Variables of Interest: war related variables
+
+LITSIII$WW2injury <- ifelse(LITSIII$q924a==1,1,0)
+LITSIII$WW2injury[LITSIII$q924a<1]=NA
+summary(LITSIII$WW2injury)
+
+
+LITSIII$WW2moved <- ifelse(LITSIII$q924b==1,1,0)
+LITSIII$WW2moved[LITSIII$q924b<1]=NA
+summary(LITSIII$WW2moved)
+
+LITSIII$WW2any <- ifelse(LITSIII$q924a==1 |LITSIII$q924b==1,1,0)
+LITSIII$WW2any[LITSIII$q924a<1 | LITSIII$q924b<1]=NA
+summary(LITSIII$WW2any)
+
+
+# -1 is not asked - for countries where there was no recent war
+# so we put all zero for those as no wars in those!
+
+LITSIII$recentwarinjury <- ifelse(LITSIII$q924c==1,1,0)
+LITSIII$recentwarinjury[LITSIII$q924c< -1]=NA
+summary(LITSIII$recentwarinjury)
+
+LITSIII$recentwarHHinjury <- ifelse(LITSIII$q924d==1,1,0)
+LITSIII$recentwarHHinjury[LITSIII$q924d< -1]=NA
+summary(LITSIII$recentwarHHinjury)
+
+LITSIII$recentwarmoved <- ifelse(LITSIII$q924e==1,1,0)
+LITSIII$recentwarmoved[LITSIII$q924e< -1]=NA
+summary(LITSIII$recentwarmoved)
+
+LITSIII$recentwarany <- ifelse(LITSIII$q924c==1 |LITSIII$q924d==1 |LITSIII$q924e==1,1,0)
+LITSIII$recentwarany[LITSIII$q924c< -1 | LITSIII$q924d< -1 | LITSIII$q924e< -1]=NA
+
+summary(LITSIII$recentwarany)
+
+
+
+```
+
+```{r all health LITSIII, include=FALSE}
+#3.  The Common Control Variables
+
+##health variable, removing those who don't know when asked how they would assess their health
+LITSIII$health <- LITSIII$q901
+LITSIII$health[LITSIII$health<0]=NA
+summary(LITSIII$health)
+
+LITSIII$healthgood <-ifelse(LITSIII$health==1|LITSIII$health==2,1,0)
+LITSIII$healthgood[LITSIII$health<0]=NA
+
+LITSIII$healthbad <-ifelse(LITSIII$health==4|LITSIII$health==5,1,0) 
+LITSIII$healthbad[LITSIII$health< 0]=NA
+summary(LITSIII$healthbad)
+summary(LITSIII$healthgood)
+
+```
+
+```{r all marital status LITSIII, include=FALSE}
+# note that in III widowed is 3 while this was 5 in LITS II
+# so lets put in same way
+LITSIII$maritalstatus <- LITSIII$q107_1
+LITSIII$maritalstatus<-ifelse(LITSIII$maritalstatus==3,6,LITSIII$maritalstatus)
+LITSIII$maritalstatus<-ifelse(LITSIII$maritalstatus==4,3,LITSIII$maritalstatus)
+LITSIII$maritalstatus<-ifelse(LITSIII$maritalstatus==5,4,LITSIII$maritalstatus)
+LITSIII$maritalstatus<-ifelse(LITSIII$maritalstatus==6,5,LITSIII$maritalstatus)
+# the above brings it inline with LITSII
+
+
+LITSIII$maritalstatus[LITSIII$maritalstatus<0.01]=NA
+summary(LITSIII$maritalstatus)
+LITSIII$married <- ifelse(LITSIII$maritalstatus == 2, 1, 0)
+LITSIII$married[LITSIII$maritalstatus<0.01]=NA
+summary(LITSIII$married)
+
+# ivlevs put seperated and divorced together
+
+LITSIII$maritalstatusivlevs <- LITSIII$maritalstatus
+LITSIII$maritalstatusivlevs<-ifelse(LITSIII$maritalstatusivlevs==4,3,LITSIII$maritalstatusivlevs)
+LITSIII$maritalstatusivlevs[LITSIII$maritalstatus<0.01]=NA
+summary(LITSIII$maritalstatusivlevs)
+
+```
+
+```{r all gender LITSIII, include=FALSE}
+
+LITSIII$male <- ifelse(LITSIII$gender_pr==1,1,0)
+LITSIII$male[LITSIII$gender_pr<1]=NA
+summary(LITSIII$male)
+LITSIII$female <- ifelse(LITSIII$gender_pr==2,1,0)
+LITSIII$female[LITSIII$gender_pr<1]=NA
+summary(LITSIII$female)
+```
+
+```{r all respondentage LITSIII, include=FALSE}
+
+##FOR ALL DATASETS, removing those under the age of 17 to have adults only be analysed for results; safety and privacy concerns and consistency
+
+LITSIII<-subset(LITSIII, LITSIII$age_pr>17)
+
+
+# yob (Kijewski)
+LITSIII$yob <- 2010 - LITSIII$age_pr
+LITSIII$yob[LITSIII$age_pr<18]=NA
+summary(LITSIII$yob)
+
+
+LITSIII$age <- LITSIII$age_pr
+LITSIII$age[LITSIII$age_pr<18]=NA
+summary(LITSIII$age)
+
+LITSIII$agesq <- LITSIII$age^2
+summary(LITSIII$agesq)
+##creating a standardized squared term of age as age has been found to have a u shaped relationship with happiness (kijewski)
+
+LITSIII$agesqst <-(LITSIII$agesq - summary(LITSIII$agesq)['Mean'])/sd(LITSIII$agesq, na.rm=TRUE)
+summary(LITSIII$agesqst)
+LITSIII$agesqst[LITSIII$age_pr<18]=NA
+
+# age categories (ivlevs)
+
+LITSIII$age1824 <- ifelse(LITSIII$age_pr>17 & LITSIII$age_pr<25, 1, 0)
+LITSIII$age1824[LITSIII$age_pr<18]=NA
+
+
+LITSIII$age2534 <- ifelse(LITSIII$age_pr>24 & LITSIII$age_pr<35, 1, 0)
+LITSIII$age2534[LITSIII$age_pr<18]=NA
+
+
+LITSIII$age4554 <- ifelse(LITSIII$age_pr>44 & LITSIII$age_pr<55, 1, 0)
+LITSIII$age4554[LITSIII$age_pr<18]=NA
+
+LITSIII$age5564 <- ifelse(LITSIII$age_pr>54 & LITSIII$age_pr<65, 1, 0)
+LITSIII$age5564[LITSIII$age_pr<18]=NA
+
+
+summary(LITSIII$age1824)
+summary(LITSIII$age2534)
+summary(LITSIII$age4554)
+summary(LITSIII$age5564)
+
+```
+
+```{r all fatherseducation LITSIII, include=FALSE}
+# this is not the nr of years but a dummy for highest level!!!
+LITSIII$fatherseducation <- LITSIII$q110_1
+LITSIII$fatherseducation[LITSIII$q110_1<0]=NA
+summary(LITSIII$fatherseducation)
+
+```
+
+```{r all employment LITSIII, include=FALSE}
+
+LITSIII$employeddummy <- ifelse(LITSIII$PRq502 == 1, 1, 0)
+LITSIII$employeddummy[LITSIII$PRq502<1]=NA
+summary(LITSIII$employeddummy)
+
+
+# Kijewski employmentstatus variable
+##grouping the people that are actively unemployed i.e. in the labour pool as they are actively looking for work/additional work (data from q522) but still unemployed (data from q501)
+
+##grouping the people who answered "yes" to employed in the last 12 months into a dummy variable with those employed as the reference variable
+LITSIII$employmentstatus <- ifelse(LITSIII$PRq502 == 1, 0, 2)
+LITSIII$employmentstatus[LITSIII$PRq502<1]=NA
+# then use q601 for those looking for job among those without employment
+LITSIII$lookingforjob <- ifelse(LITSIII$q601 == 1 & LITSIII$PRq502 == 2, 1,0)
+LITSIII$employmentstatus[LITSIII$lookingforjob==1]=1
+table(LITSIII$employmentstatus)
+summary(LITSIII$employmentstatus)
+
+```
+
+```{r all education LITSIII, include=FALSE}
+#education variable, removing those who refused to answer or don't know
+# 6 Tertiary education (not a university diploma) was not availble in II
+# let's add 6 and 7 as 6 (BA) and make 8 MA as 7 like in II
+LITSIII$education <- LITSIII$q109_1
+LITSIII$education<-ifelse(LITSIII$education==7,6,LITSIII$education)
+LITSIII$education<-ifelse(LITSIII$education==8,7,LITSIII$education)
+LITSIII$education[LITSIII$q109_1<1]=NA
+summary(LITSIII$education)
+
+# ivlevs. childs
+LITSIII$education1 <- ifelse(LITSIII$education==3 | LITSIII$education==4, 1, 0)
+LITSIII$education2 <- ifelse(LITSIII$education==5|LITSIII$education==6 | LITSIII$education==7, 1, 0)
+LITSIII$education3categories <- LITSIII$education1+2*LITSIII$education2
+LITSIII$education3categories[LITSIII$q109_1<1]=NA
+summary(LITSIII$education3categories)
+
+
+# djankov
+LITSIII$education1 <- ifelse(LITSIII$education==3 | LITSIII$education==4, 1, 0)
+LITSIII$education2 <- ifelse(LITSIII$education==5,1, 0)
+LITSIII$education3 <- ifelse(LITSIII$education==6 | LITSIII$education==7, 1, 0)
+LITSIII$education4categories <- LITSIII$education1+2*LITSIII$education2+3*LITSIII$education3
+LITSIII$education4categories[LITSIII$q109_1<1]=NA
+summary(LITSIII$education4categories)
+
+# Nikolova/Sanfey
+LITSIII$education6categories <- LITSIII$education
+LITSIII$education6categories[LITSIII$education==7]=6
+LITSIII$education6categories[LITSIII$q109_1<1]=NA
+summary(LITSIII$education6categories)
+
+
+
+
+
+```
+
+```{r frequent income LITSIII, include=FALSE}
+#4.  The frequent Control Variable (4 out of 5) - Income
+
+#income: Income of the respondent's household, as measured on a 10-step #income ladder; LiTS 2010 q227
+
+LITSIII$income <- LITSIII$PRq315
+LITSIII$income[LITSIII$PRq315<1]=NA
+summary(LITSIII$income)
+```
+
+```{r eliminating older population LITSIII, include=FALSE}
+#5.  Sample Restrictions
+
+LITSIII$under65<-(LITSIII$age_pr<65)*1
+summary(LITSIII$under65)
+
+
+LITSIII$under65migration<-ifelse(LITSIII$age_pr<65 & LITSIII$q912>0,1,0)
+summary(LITSIII$under65migration)
+
+```
+
+```{r restricting sample to 15 countries LITSIII, include=FALSE}
+LITSIII$sample15<-ifelse(LITSIII$country=='Belarus'|LITSIII$country=='Bulgaria'|LITSIII$country=='Czech Republic'|LITSIII$country=='Estonia'|LITSIII$country=='Hungary'|LITSIII$country=='Latvia'|LITSIII$country=='Lithuania'|LITSIII$country=='Moldova'|LITSIII$country=='Poland'|LITSIII$country=='Romania'|LITSIII$country=='Russia'|LITSIII$country=='Serbia'|LITSIII$country=='Slovak Republic'|LITSIII$country=='Slovenia'|LITSIII$country=='Ukraine',1,0)
+summary(LITSIII$sample15)
+```
+
+```{r eliminating Kosovo LITSIII, include=FALSE}
+#5.  Sample Restrictions
+
+##removing Kosovo from data, following what Kijewski has done in their analysis  
+LITSIII$nokosovo<-(LITSIII$country!='Kosovo')*1
+summary(LITSIII$nokosovo)
+```
+
+```{r LITSIII missing country nrs variable, include=FALSE}
+#6.  Loading additional datasets
+
+# LITSIII has no country number variable - let's create based on LITSII nrs 
+
+z<-LITSII %>%
+    group_by(country_) %>%
+    summarise_at(vars(country), list(name = mean))
+
+# country names are slightly different in LITS3
+LITSIII$country[LITSIII$country=="Bosnia and Herz."]="Bosnia"
+LITSIII$country[LITSIII$country=="Czech Rep."]="Czech Republic"
+LITSIII$country[LITSIII$country=="FYR Macedonia"]="Macedonia"
+LITSIII$country[LITSIII$country== "Kyrgyz Rep."]="Kyrgyzstan"
+LITSIII$country[LITSIII$country== "Slovak Rep."]="Slovakia"
+
+# to get same names as in LITSII
+LITSIII$country_<-LITSIII$country
+LITSIII$country<-LITSIII$country
+
+for (i in 1:35)
+{
+LITSIII$country[LITSIII$country==unname(unlist(z[i,'country_']))]=unname(unlist(z[i,'name']))
+}
+
+LITSIII$country<-as.numeric(LITSIII$country)
+#
+#FYI are not included in LITSIII but are in LITII
+#"France" 61
+#"Great Britain" 66
+#"Sweden" 162
+
+#not icnluded in II but in III
+# let's guive these nrs
+#Greece =4 
+#Cyprus =5
+# these nrs were not used yet
+LITSIII$country[LITSIII$country_=='Greece']=4
+LITSIII$country[LITSIII$country_=='Cyprus']=5
+
+```
+
+```{r additional world bank data LITSIII, include=FALSE}
+#library(readxl)
+#worldbank <- read_excel("Pdrive/R backup/replications 2024 bu/world bank data.xlsx")
+
+#worldbank[35,'country']=193 # to add Kosovo for which no data exist
+#summary(LITSII$country)
+##merge datasets of LITSII and worldbank data by country (country code not name) to include in working dataset
+#LITSII <- merge(worldbank, LITSII, by="country", all.x = TRUE)
+
+#For the sake of interpretation, the country-level variables are standardized in the final models.\[p1262\]
+z<-LITSIII %>%
+    group_by(country_) %>%
+    summarise_at(vars(country), list(name = mean))
+
+
+LITSIII$LifeExpectancy<-0
+
+countrycodes=c('AL','AM', 'AZ', 'BY','BA','BG','HR','CY','CZ','EE','GE','DE','GR','HU','IT','KZ', 'XK', 'KG', 'LV','LT','MK','MD','MN','ME', 'PL', 'RO', 'RU','RS','SK','SI','TJ','TR','UA','UZ')
+
+dat = WDI(indicator='SP.DYN.LE00.IN', country=countrycodes, start=2016, end=2016)
+
+for (i in 1:34)
+{
+LITSIII$LifeExpectancy[LITSIII$country==unname(unlist(z[i,'name']))]=dat[dat$iso2c==countrycodes[i],'SP.DYN.LE00.IN']
+}
+
+
+LITSIII$Population<-0
+
+dat = WDI(indicator='SP.POP.TOTL', country=countrycodes, start=2014, end=2016)
+
+for (i in 1:34)
+{
+LITSIII$Population[LITSIII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'SP.POP.TOTL'],na.rm = TRUE)
+}
+
+
+
+LITSIII$GDPPC<-0
+
+dat = WDI(indicator='NY.GDP.PCAP.CD', country=countrycodes, start=2014, end=2016)
+
+for (i in 1:34)
+{
+LITSIII$GDPPC[LITSIII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'NY.GDP.PCAP.CD'],na.rm = TRUE)
+}
+
+
+
+LITSIII$Unemployment<-0
+
+dat = WDI(indicator='SL.UEM.TOTL.NE.ZS', country=countrycodes, start=2014, end=2016)
+
+for (i in 1:34)
+{
+LITSIII$Unemployment[LITSIII$country==unname(unlist(z[i,'name']))]=mean(dat[dat$iso2c==countrycodes[i],'SL.UEM.TOTL.NE.ZS'],na.rm = TRUE)
+}
+
+
+
+LITSIII$Population <-(LITSIII$Population - summary(LITSIII$Population)['Mean'])/sd(LITSIII$Population, na.rm=TRUE)
+
+LITSIII$GDPPC <-(LITSIII$GDPPC - summary(LITSIII$GDPPC)['Mean'])/sd(LITSIII$GDPPC, na.rm=TRUE)
+
+LITSIII$Unemployment <-(LITSIII$Unemployment - summary(LITSIII$Unemployment)['Mean'])/sd(LITSIII$Unemployment, na.rm=TRUE)
+
+
+LITSIII$LifeExpectancy <-(LITSIII$LifeExpectancy - summary(LITSIII$LifeExpectancy)['Mean'])/sd(LITSIII$LifeExpectancy, na.rm=TRUE)
+
+```
+
+```{r  Adding PSU longitude/latitude/altitude again, include=FALSE }
+# latitude and longitude is in the LITSIII dataset
+# longitude not available
+
+LITSIII$longitudepsu<-LITSIII$longitude
+LITSIII$latitudepsu<-LITSIII$latitude
+
+summary(LITSIII$longitude)
+summary(LITSIII$latitude)
+```
+
+```{r all kijewski additional variables III, include=FALSE}
+#7.  unique variables
+
+ #occupation is not available as far as i can see
+
+#church attendance
+##creating a dummy variable with those who are not an active member of church as the base/reference variable
+
+
+LITSIII$religion <- ifelse(LITSIII$q919a == 1, 1, 0)
+LITSIII$religion[LITSIII$q919a<1]=NA
+summary(LITSIII$religion)
+
+
+
+#civil activity
+##civil active variable, removing those not active in civil activity from each type of voluntary organisation or group to include only relevant data (i.e. not missing)
+
+##summing the amount of people that are active in each type of voluntary organization (i.e. is an active member of each of the groups)
+#LITS III HAS 2 MORE CATEGORIES
+LITSIII$civilsum <- with(LITSIII, q919b==1) + with(LITSIII, q919c==1) + with(LITSIII, q919d==1) + with(LITSIII, q919e==1) + with(LITSIII, q919f==1) + with(LITSIII, q919g==1) + with(LITSIII, q919h==1)+ with(LITSIII, q919i==1)+ with(LITSIII, q919j==1)
+LITSIII$civil <- ifelse(LITSIII$civilsum>0, 1, 0)
+
+LITSIII$civil[LITSIII$q919b<1|LITSIII$q919c<1|LITSIII$q919d<1|LITSIII$q919e<1|LITSIII$q919f<1|LITSIII$q919g<1|LITSIII$q919h<1|LITSIII$q919i<1|LITSIII$q919j<1]=NA
+table(LITSIII$civil)
+summary(LITSIII$civil)
+```
+
+```{r childs unique variables III , include=FALSE}
+# Mother's education: Years of respondent's mother's full-time education; LiTS 2010 q.719.
+# again these are categories in LITSIII
+LITSIII$motherseducation <- LITSIII$q111_1
+LITSIII$motherseducation[LITSIII$q111_1<0]=NA
+summary(LITSIII$motherseducation)
+
+
+
+#communist: whether the respondent or any members of his/her family were members of the communist party. q920a/b/c/d
+
+LITSIII$communist <- ifelse(LITSIII$q920a==1 | LITSIII$q920b==1|LITSIII$q920c==1|LITSIII$q920d==1,1,0)
+LITSIII$communist [LITSIII$q920a<0 | LITSIII$q920b<0|LITSIII$q920c<0|LITSIII$q920d<0]=NA
+summary(LITSIII$communist)
+
+
+
+# ever moved (q908 is how long you lived in your current place - all life is -90)
+LITSIII$moved <- ifelse(LITSIII$q908!=-90,1,0)
+LITSIII$moved[LITSIII$q908< -90]=NA
+summary(LITSIII$moved)
+
+# only 2 rather than 3 categories
+# no metropolitan
+# category names are same, in litsII metropolitan is 3
+LITSIII$urbanrural <- LITSIII$urban
+LITSIII$urban[LITSIII$urban<1]=NA
+summary(LITSIII$urban)
+
+#RegionDummies: variable region_name (alternative would be town?)
+
+```
+
+```{r ivlevs unique variables III, include=FALSE}
+#minority not available in LITS III as mother tongue not asked for
+
+
+
+#having children (in HH)
+
+LITSIII$children<-ifelse(LITSIII$q105_1<18 & !is.na(LITSIII$q105_1),1,0)+ifelse(LITSIII$q105_2<18 & !is.na(LITSIII$q105_2),1,0)+ifelse(LITSIII$q105_3<18 & !is.na(LITSIII$q105_3),1,0)+ifelse(LITSIII$q105_4<18 & !is.na(LITSIII$q105_4),1,0)+ifelse(LITSIII$q105_5<18 & !is.na(LITSIII$q105_5),1,0)+ifelse(LITSIII$q105_6<18 & !is.na(LITSIII$q105_6),1,0)+ifelse(LITSIII$q105_7<18 & !is.na(LITSIII$q105_7),1,0)+ifelse(LITSIII$q105_8<18 & !is.na(LITSIII$q105_8),1,0)+ifelse(LITSIII$q105_9<18 & !is.na(LITSIII$q105_9),1,0)
+
+LITSIII$children<-ifelse(LITSIII$children>0,1,0) 
+
+# assets
+# extracting the first principal component 202 
+# NOTE  slight difference: in III it's own or USE, and less assets
+LITSIII$assets<-prcomp(select(LITSIII,q202a,q202b,q202c,q202d,q202e,q202f, q202g), center=TRUE)$x[,1]
+
+
+# financial satisfaction
+LITSIII$finsat <- LITSIII$q401k 
+LITSIII$finsat[LITSIII$q401k<1]=NA
+LITSIII$finsat[LITSIII$q401k>5]=NA
+summary(LITSIII$finsat)
+
+#"I construct a migrant networks 
+#NOT AVAILABLE
+```
+
+```{r djankov unique III, include=FALSE}
+#COUNTRY VARIABLE ALREADY MADE NUMERIC WHEN MERGING WITH wb
+
+##eastern europe variable, grouping non eastern european countries and making a dummy variable where all non-eastern european countries are equal to 0 and otherwise 1 
+LITSIII$easteurope <- ifelse(LITSIII$country == 4 | LITSIII$country == 64 | LITSIII$country == 84 | LITSIII$country == 5 | LITSIII$country == 174 , 0, 1) 
+table(LITSIII$easteurope)
+```
+
+```{r kijewski regressionsIII, include=FALSE}
+####Replicating @Kijewski2020
+
+# note: religion not asked in ?Uzbekistan
+# WW2 experience not asked in Italy and Cyprus
+#install.packages("lme4")
+library("lme4")
+options(scipen=999)
+
+kijewskireplicationIII <- lmer(lifesatisfaction15 ~ WW2injury+ WW2moved  + yob + agesqst + female + as.factor(maritalstatus) + education + as.factor(fatherseducation) + as.factor(employmentstatus)  + health + religion + civil + GDPPC + Unemployment + Population + LifeExpectancy + (1 | country), data = LITSIII[LITSIII$nokosovo==1,])
+
+
+summary(kijewskireplicationIII)
+
+```
+
+```{r childs regressions III, include=FALSE}
+#### Replicating @ChildNikolova2020
+
+library(estimatr)  
+
+
+childsreplicationIII <- lm_robust(lifesatisfaction15 ~ WW2injury + WW2moved+male+health + employeddummy + income +as.factor(education3categories)  + as.factor(fatherseducation)+as.factor(motherseducation)+ communist+moved+longitudepsu+latitudepsu+urban+ married + age +agesq,
+                                      
+                                      se_type = "stata",
+                                      fixed_effects = ~ region_name,weights=weight_sample,
+                                      data = LITSIII[LITSIII$sample15==1,],clusters = region_name)
+summary(childsreplicationIII)
+
+
+```
+
+```{r ivlevs regressionsIII, include=FALSE}
+#### Replicating @Ivlevs2015
+
+library(estimatr)  
+
+ivlevsreplicationIII <- lm_robust(lifesatisfaction15 ~ WW2injury +female + age1824 + age2534 +age4554+age5564 +as.factor(maritalstatusivlevs) +children +as.factor(education3categories) +assets+ income +finsat + employeddummy + healthgood +healthbad +as.factor(fatherseducation) + as.factor(urbanrural),
+                                      se_type = "stata",
+                                      fixed_effects = ~ country,weights=weight_sample,
+                                      data = LITSIII[LITSIII$under65migration==1,],clusters = town)
+summary(ivlevsreplicationIII)
+```
+
+```{r nikolova regression s1 III, include=FALSE}
+
+library(estimatr)  
+
+nikolovareplicationIII <- lm_robust(lifesatisfaction15~WW2any+health + married + age +agesq+male+education6categories+ income + employeddummy + as.factor(fatherseducation),
+                                      
+                                      se_type = "stata",
+                                      fixed_effects = ~ country,weights=weight_sample,
+                                      data = LITSIII,clusters = country_)
+summary(nikolovareplicationIII)
+```
+
+```{r djankov regression III , include=FALSE}
+#### Replicating @Djankovetal2016
+
+library(estimatr)  
+
+
+
+djankovreplicationIII <- lm_robust(lifesatisfaction15~WW2any+health + married + age_pr + agesq + male +as.factor(education4categories) + income + employmentstatus + as.factor(fatherseducation)  + easteurope+latitudepsu+longitudepsu,
+                                      se_type = "stata",
+                                      weights=weight_sample,
+                                      data = LITSIII,clusters = country_)
+summary(djankovreplicationIII)
+
+
+```
+
+```{r djankov table III, include=FALSE}
+tab <- matrix(c(-0.108, 'p<0.01', 25618, round(summary(kijewskireplicationIII)$coefficients[2,1],3)
+ ,ifelse(2*pt(summary(kijewskireplicationIII)$coefficients[2,3], df=nobs(kijewskireplicationIII), lower.tail=sign(summary(kijewskireplicationIII)$coefficients[2,3])==-1)<0.1, 'p<0.1', ifelse(2*pt(summary(kijewskireplicationIII)$coefficients[2,3], df=nobs(kijewskireplicationIII), lower.tail=sign(summary(kijewskireplicationIII)$coefficients[2,3])==-1)<0.05,'p<0.05','p>0.1')), nobs(kijewskireplicationIII),-0.006, 'p>0.1', 9538, round(summary(childsreplicationIII)$coefficients[1,1],3) ,ifelse(summary(childsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(childsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(childsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(childsreplicationIII)$nobs, 0.071, 'p<0.05', 24070,round(summary(ivlevsreplicationIII)$coefficients[1,1],3) ,ifelse(summary(ivlevsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(ivlevsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(ivlevsreplicationIII)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(ivlevsreplicationIII)$nobs, 0.0241, 'p>0.1', 25666,round(summary(nikolovareplicationIII)$coefficients[1,1],3) ,ifelse(summary(nikolovareplicationIII)$coefficients[1,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(nikolovareplicationIII)$coefficients[1,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(nikolovareplicationIII)$coefficients[1,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(nikolovareplicationIII)$nobs, -0.008, 'p>0.1', 24836,round(summary(djankovreplicationIII)$coefficients[2,1],3) ,ifelse(summary(djankovreplicationIII)$coefficients[2,"Pr(>|t|)"] <0.01, 'p<0.01', ifelse(summary(djankovreplicationIII)$coefficients[2,"Pr(>|t|)"] <0.05,'p<0.05', ifelse(summary(djankovreplicationIII)$coefficients[2,"Pr(>|t|)"] <0.1,'p<0.1', 'p>0.1'))), summary(djankovreplicationIII)$nobs), ncol=6, byrow=TRUE)
+colnames(tab) <- c('Effect Size','P value','Sample Size','Replication Effect Size','Replication P value', 'Replication Sample Size')
+rownames(tab) <- c('Kijewski 2020','Childs and Nikolova 2020', 'Ivlevs 2015', 'Nikolova and Sanfey 2016', 'Djankov et al. 2016')
+tab2 <- as.table(tab)
+tab2
+```
+
+Table IV compares the results of the original studies with the replicated results using the data from LITSIII. Interestingly, the replication results with the new data are similar to the results obtained by the original studies. Using @Kijewski2020 's methodology, we find a negative and significant effect, using @Ivlevs2015 's methodology, we find a positive and significant effect while the other studies produce no significant effect. This suggest that if the original authors had done their studies later, using LITSIII rather than LITSII, they would have obtained similar conclusions in terms of the long-term impact of war on life satisfaction.
+
+```{r include=FALSE}
+library(gt)
+gt_tbl <- gt(as.data.frame(tab), rownames_to_stub = TRUE)
+gt_tbl|>cols_align(align = c("center"),columns = everything()
+)|>tab_header( 'Table IV: Replicating the Literature with 2016 data', subtitle = NULL, preheader = NULL)
+# Show the gt Table
+#gt_tbl
+gt_tbl |> gtsave("tab_3.png")
+```
+
+![](tab_3.png)
+
+## VI. A Specification Curve Analysis using the more recent data.
+
+For completeness, our final step is to perform a specification curve analysis with the more recent data from LITSIII.
+
+```{r  specification curve LITSIII start, include=FALSE}
+
+# we change thet category for under65 to 0 and 65 rather than 0 and 1
+# this is for the subsetting below - if two 0-1 dummy variables used for subsetting they are mixed under the 1 header
+LITSIII$under65<-LITSIII$under65*65
+```
+
+```{r  specification curve III, include=FALSE}
+
+#install.packages("specr")  
+#install.packages("broom.mixed`") 
+library(specr)
+library(broom.mixed)
+library("tidyverse")
+library(ggplot2)
+library(fixest)
+
+
+Kijewski2020 <- function(formula, data,...) {
+  require(lme4)
+  require(broom.mixed)
+  formula <- paste(formula, "+ (1|country)")
+  lmer(formula, data)
+}
+
+ChildsNikolova2020 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "|region_name"))
+  feols(formula,  cluster=~region_name, weights=~weight_sample, data = data)
+}
+
+Ivlevs2015 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~town, weights=~weight_sample, data = data)
+}
+
+
+NikolovaSanfey2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula, "| country"))
+  feols(formula,  cluster=~country, weights=~weight_sample, data = data)
+}
+
+Djankovetal2016 <- function(formula, data) {
+  formula <- as.formula(paste0(formula))
+  feols(formula,  cluster=~country, weights=~weight_sample, data = data)
+}
+
+
+specs <- setup(data = LITSIII,
+                y = c("lifesatisfaction15"),
+                x = c("WW2injury"),
+               subset=list(sample15 = c(1), under65 = c(65)),
+                model = c("Kijewski2020", "ChildsNikolova2020","Ivlevs2015","NikolovaSanfey2016", "Djankovetal2016"),
+               controls = c("religion+civil + GDPPC+ Unemployment+Population+LifeExpectancy+ as.factor(motherseducation)+ communist+moved+as.factor(urbanrural)+children + easteurope + latitudepsu+longitudepsu ","recentwarmoved+recentwarinjury+recentwarHHinjury+ WW2moved","income+assets+finsat"), add_to_formula = "age + agesq + female+as.factor(maritalstatus)+ as.factor(education) + as.factor(fatherseducation) + as.factor(employmentstatus) + health", simplify=FALSE)
+
+results <- specr(specs)  
+print(results$data)
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub( tom[10], 'War Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[5],'Other Controls', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom=results$data%>%pull(controls),controls= gsub(tom[15],'Income', controls, fixed = TRUE))
+
+results$data<-results$data%>% mutate(tom= grepl( '1 & 65', subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five in heavily affected countries only",subsets)) 
+
+
+results$data<-results$data%>% mutate(tom= grepl( 65, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Under sixty-five",subsets)) 
+
+results$data<-results$data%>% mutate(tom= grepl( 1, subsets, fixed = TRUE), subsets = if_else(tom==TRUE, "Heavily affected countries only",subsets)) 
+
+
+plot(results, type='curve', main = "Figure 1: Specification Curve")
+plot(results, type='choices', main = "Figure 2: Specification Curve - Choices")
+
+```
+
+As Figure V shows, we again find a wide range of results depending on the specification choices we make. Interestingly, compared to Figure I which mainly showed negative effects, using the third wave leads to many more positive effects.
+
+Figure V: A Specification Curve for the Impact of Being Injured/ Having Injored or Killed Relatives during World War II on Life Satisfaction, LITSIII.
+
+```{r results to show Ia iii, echo=FALSE}
+
+plot(results, type='curve', main = "Figure 3: Specification Curve")
+
+```
+
+Interestingly, the income variables are again crucially important for the conclusions (see Figure VI). Like in Figure II including income increases the estimated impact of the war variable. While in Figure I this increase turned significantly negative estimates into insignificant estimates, when using LITSIII, the increase one gets by including income variables tends to push the estimated effect of the war variable from insignificant to significantly positive.
+
+Figure VI: What Affects the Estimated Effect Size of Being Injured/Having Injured or Killed Relatives during World War II, LITSIII.
+
+```{r results to show Ib iii, echo=FALSE}
+
+plot(results, type='choices', main = "Figure 2: Specification Curve - Choices")
+
+```
+
+```{r specification curve median and pos III, include=FALSE}
+
+summary(results)
+sum(results$data['estimate']>0)
+sum(results$data['conf.low']<0)
+sum(results$data['conf.high']<0)
+
+library(jtools)
+tom<-lm(estimate~as.factor(model)+as.factor(subsets)+as.factor(controls), data=results$data)
+summary(tom)
+# for nice table?
+summ(tom)
+```
+
+## VII. Conclusions.
+
+In this paper, we replicate the literature that uses the second wave of the Life in Transition Survey to estimate the impact of World War II on life satisfaction, conduct a specification curve analysis, and update the literature by also using data from the third wave of the survey. While war experience is not fully randomized, limiting causal claims one can make about its impact, the LITS II survey is a great source of observational data to investigate the long-run relationship between war and life satisfaction given it asks a large sample of respondents about various war experiences, and measures life satisfactions in multiple ways.
+
+Given the suitability of the survey, it is no surprise that the published literature using LITS II to regress life satisfaction on war experience ( @Kijewski2020, @ChildNikolova2020, @Ivlevs2015, @NikolovaSanfey2016, @Djankovetal2016) is sizable. More surprising is that, depending on the paper one reads, one can find a significant negative effect, a significant positive effect or insignificant effects of World War II experience on life satisfaction, despite these studies all using the same dataset and similar measures of life satisfaction and war experience.
+
+In this paper, we explore the reasons for this heterogeneity in findings. Directly replicating the five papers using the LITS II data, we find effect sizes and statistical significance that are similar to those published. And even when using the more recent LITS III (2016 vs. 2010) to update these five papers we come to similar conclusions as the original authors.
+
+However, a specification curve analysis finds that, based on 320 'reasonable' specifications and the LITS II data, the impact of being injured/having a family member being injured or killed during World War II is mainly estimated to be negative but that these estimates are statistically significant only when not including income as a control variable. A specification curve analysis, based on 320 'reasonable' specifications and the LITS III data, similarly shows the importance of the including income variables but shows that the impact of being injured/having a family member being injured or killed during World War II is mainly estimated to be positive but that these estimates are statistically significant only when including income as a control variable.
+
+We further show that the impact of having moved because of World War II is mainly estimated to have a positive effect but only so when measuring life satisfaction on a 1-10 scale (rather than a 1-5 scale). Finally, we find little support for a significant effect of recent war experience on life satisfaction.
+
+Overall, this study shows that there is no easy answer to the question whether experiencing a war has a long-term impact on life satisfaction. The assumptions one chooses to make in terms of control variables, measurement of life satisfaction and war experience, whether to weigh observations or cluster standard errors, affect whether one obtains a negative, positive, significant or insignificant estimate. Moreover, the vast majority of specifications suggest the estimated impact is minor when compared to the overall variation in life satisfaction. Hence, using the Bradford-Hill criteria (@BradfordHill1965), we would argue that research about the long-term impact of war based on LITS data shows low consistency and low strength, and thus provides little support for there being a causal long-term effect of war experience on life satisfaction.
+
+This paper further adds to the literature that shows that the choices researchers make when analysing a dataset can have a major impact on the conclusions they draw. It is also a warning to readers that single papers, even when including several robustness checks, do not necessarily represent what one would learn from a comprehensive analysis from the same dataset. The analysis here thus suggests a specification curve analysis should be a part of any empirical paper, especially now that software packages are available which make running hundreds of specifications straightforward. Rather than focusing on robustness checks that confirm the main finding of a paper, authors should focus on revealing the true extent of model uncertainty.
